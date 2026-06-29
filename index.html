@@ -396,6 +396,7 @@ button:disabled{opacity:.5;cursor:default;}
     <button class="atab" onclick="aTab('ot')" id="atab-ot">⚠ OT <span class="badge-n" id="ot-badge" style="display:none">0</span></button>
     <button class="atab" onclick="aTab('leave')" id="atab-leave">📅 Leave <span class="badge-n" id="lv-badge" style="display:none">0</span></button>
     <button class="atab" onclick="aTab('reports')" id="atab-reports">📄 Reports</button>
+    <button class="atab" onclick="aTab('perf')" id="atab-perf">🎯 Performance</button>
     <button class="atab" onclick="aTab('emp')" id="atab-emp">👥 Employees</button>
     <button class="atab" onclick="aTab('applicants')" id="atab-applicants">📝 Applicants <span class="badge-n" id="app-badge" style="display:none">0</span></button>
     <button class="atab" onclick="aTab('reviews')" id="atab-reviews">⭐ Reviews <span class="badge-n" id="rev-badge" style="display:none">0</span></button>
@@ -462,6 +463,29 @@ button:disabled{opacity:.5;cursor:default;}
         </div>
       </div>
       <div id="a-report-output"></div>
+    </div>
+
+    <!-- ════ PERFORMANCE REPORT — Merged attendance + tasks + evals ════ -->
+    <div id="apanel-perf" style="display:none;">
+      <div class="aform">
+        <div class="aform-title">🎯 Performance Report</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5;">
+          Unified view of attendance, task productivity, and evaluation scores. Pulls from TimeLogs, TaskSessions, Evals, and KPIs sheets.
+        </div>
+        <div class="aform-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;">
+          <div class="fg"><label class="fl">Employee</label><select class="fi" id="perf-emp"></select></div>
+          <div class="fg"><label class="fl">From Date</label><input class="fi" type="date" id="perf-from"></div>
+          <div class="fg"><label class="fl">To Date</label><input class="fi" type="date" id="perf-to"></div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="perfPreset('week')">This Week</button>
+          <button class="btn btn-outline btn-sm" onclick="perfPreset('month')">This Month</button>
+          <button class="btn btn-outline btn-sm" onclick="perfPreset('quarter')">Last 90 Days</button>
+          <button class="btn btn-t" onclick="perfGenerate()">📊 Generate Report</button>
+        </div>
+      </div>
+
+      <div id="perf-output"></div>
     </div>
 
     <!-- EMPLOYEES -->
@@ -1668,7 +1692,7 @@ function showAdminView(){
 }
 
 function aTab(id){
-  ['dash','logs','ot','leave','reports','emp','applicants','reviews','kpi','hol','set'].forEach(function(t){
+  ['dash','logs','ot','leave','reports','perf','emp','applicants','reviews','kpi','hol','set'].forEach(function(t){
     var btn = document.getElementById('atab-'+t);
     var pnl = document.getElementById('apanel-'+t);
     if(btn) btn.classList.toggle('on',t===id);
@@ -1678,6 +1702,7 @@ function aTab(id){
   if(id === 'applicants') renderApplicants();
   if(id === 'reviews') loadReviews();
   if(id === 'kpi') kpiInit();
+  if(id === 'perf') perfInit();
 }
 
 function renderAdminDash(){
@@ -3781,6 +3806,229 @@ function kpiClear(){
   document.querySelectorAll('[data-kpi-actual]').forEach(function(el){ el.value=''; });
   document.getElementById('kpi-summary-card').style.display = 'none';
   kpiRecalc();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  🎯 PERFORMANCE REPORT — Unified attendance + tasks + evals view
+// ════════════════════════════════════════════════════════════════
+function perfInit(){
+  var sel = document.getElementById('perf-emp');
+  var staff = ((ADMIN_DATA && ADMIN_DATA.staff)||[]).filter(function(s){ return s.status !== 'inactive'; });
+  sel.innerHTML = '<option value="">— Select employee —</option>' +
+    staff.map(function(s){ return '<option value="'+esc(s.name)+'">'+esc(s.name)+'</option>'; }).join('');
+  // Default to current PHT month
+  document.getElementById('perf-from').value = monthStartPHT();
+  document.getElementById('perf-to').value = monthEndPHT();
+}
+
+function perfPreset(kind){
+  var p = nowPHT();
+  var to = todayPHT();
+  var fromD;
+  if(kind === 'week'){
+    var d = new Date(p.year, p.month-1, p.day);
+    var dow = d.getDay();
+    var diff = dow === 0 ? -6 : 1 - dow;
+    d.setDate(d.getDate() + diff);
+    fromD = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  } else if(kind === 'month'){
+    fromD = monthStartPHT();
+  } else { // quarter (last 90 days)
+    var d2 = new Date(p.year, p.month-1, p.day);
+    d2.setDate(d2.getDate() - 89);
+    fromD = d2.getFullYear() + '-' + String(d2.getMonth()+1).padStart(2,'0') + '-' + String(d2.getDate()).padStart(2,'0');
+  }
+  document.getElementById('perf-from').value = fromD;
+  document.getElementById('perf-to').value = to;
+  if(document.getElementById('perf-emp').value) perfGenerate();
+}
+
+async function perfGenerate(){
+  var emp  = document.getElementById('perf-emp').value;
+  var from = document.getElementById('perf-from').value;
+  var to   = document.getElementById('perf-to').value;
+  var out  = document.getElementById('perf-output');
+  if(!emp){ showToast('⚠ Pick an employee'); return; }
+  if(!from || !to){ showToast('⚠ Pick a date range'); return; }
+
+  out.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">📊 Compiling performance data…</div>';
+  try{
+    var r = await gas('getPerformanceReport', { employee: emp, from: from, to: to });
+    if(!r.ok) throw new Error(r.error || 'Failed to load');
+    out.innerHTML = perfRenderReport(emp, from, to, r);
+  }catch(e){
+    out.innerHTML = '<div style="color:var(--danger);padding:14px;font-size:12px;border:1px solid var(--danger);border-radius:8px;background:rgba(192,84,74,.05);">❌ '+esc(e.message)+'</div>';
+  }
+}
+
+function perfRenderReport(emp, from, to, r){
+  var att = r.attendance || {};
+  var tasks = r.tasks || {};
+  var evals = r.evals || {};
+  var kpis = r.kpis || {};
+
+  // Overall productivity index — composite score across the three dimensions
+  var attScore = 100;
+  if(att.expectedDays > 0){
+    attScore = Math.min(100, (att.daysWorked / att.expectedDays) * 100);
+  }
+  var taskScore = tasks.totalMin > 0 ? Math.min(100, (tasks.totalMin / (att.daysWorked * 60 * 4)) * 100) : 0; // assume ~4h productive per day
+  var evalScore = evals.avgScore || kpis.avgOverall || 0;
+  var compositeRaw = (attScore * 0.3) + (taskScore * 0.3) + (evalScore * 0.4);
+  var composite = Math.round(compositeRaw * 10) / 10;
+  var compColor = composite >= 85 ? { bg:'rgba(58,125,92,.12)', txt:'#3d8c6e', label:'🟢 Excellent' }
+                : composite >= 70 ? { bg:'rgba(218,175,52,.15)', txt:'#a07e1c', label:'🟡 On Track' }
+                : composite >= 50 ? { bg:'rgba(218,175,52,.15)', txt:'#a07e1c', label:'🟡 Needs Attention' }
+                : { bg:'rgba(192,84,74,.12)', txt:'#c0544a', label:'🔴 Underperforming' };
+
+  var html = '';
+
+  // ── Header card ──
+  html += '<div style="background:linear-gradient(135deg,var(--slate) 0%,#3a3a3a 100%);color:#fff;border-radius:14px;padding:20px;margin-bottom:14px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">' +
+      '<div>' +
+        '<div style="font-size:9px;text-transform:uppercase;letter-spacing:1.2px;opacity:.7;font-weight:700;">Performance Report</div>' +
+        '<div style="font-size:22px;font-weight:800;margin-top:4px;">'+esc(emp)+'</div>' +
+        '<div style="font-size:11px;opacity:.7;margin-top:2px;">'+esc(from)+' → '+esc(to)+' · '+(r.daysCovered||0)+' days covered</div>' +
+      '</div>' +
+      '<div style="text-align:center;background:'+compColor.bg+';padding:14px 18px;border-radius:12px;min-width:140px;">' +
+        '<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.7);font-weight:700;">Composite Score</div>' +
+        '<div style="font-size:36px;font-weight:800;color:'+compColor.txt+';margin-top:2px;">'+composite+'%</div>' +
+        '<div style="font-size:11px;font-weight:600;color:'+compColor.txt+';">'+compColor.label+'</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+  // ── KPI summary strip ──
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px;">';
+  html += perfStatCard('🕒 Days Worked',     (att.daysWorked||0) + (att.expectedDays ? ' / ' + att.expectedDays : ''), 'var(--teal)');
+  html += perfStatCard('⏰ Total Hours',      (att.totalHours||0).toFixed(1) + 'h', 'var(--gold)');
+  html += perfStatCard('⏱ Task Time',        _formatDuration((tasks.totalMin||0) * 60000), 'var(--success)');
+  html += perfStatCard('📋 Tasks Logged',    (tasks.totalSessions||0), 'var(--slate)');
+  html += perfStatCard('⭐ Avg Eval Score',   (evals.avgScore != null ? Math.round(evals.avgScore) + '%' : '—'), 'var(--gold)');
+  html += perfStatCard('🏆 KPI Bonus Total', '₱' + (kpis.totalBonus||0).toLocaleString(), 'var(--success)');
+  html += '</div>';
+
+  // ── Attendance section ──
+  html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">' +
+    '<div style="font-size:13px;font-weight:700;color:var(--slate);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">' +
+      '<span>📋 Attendance & Hours</span>' +
+      '<span style="font-size:11px;font-weight:600;color:'+(attScore>=90?'var(--success)':attScore>=70?'var(--gold)':'var(--danger)')+';">'+Math.round(attScore)+'%</span>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;font-size:12px;">' +
+      perfMetric('Regular hours',  (att.regHours||0).toFixed(1) + 'h') +
+      perfMetric('Overtime',       (att.otHours||0).toFixed(1) + 'h') +
+      perfMetric('Break time',     Math.round(att.breakMin||0) + ' min') +
+      perfMetric('Avg shift',      (att.avgShift||0).toFixed(1) + 'h') +
+      perfMetric('Late arrivals',  (att.lateCount||0)) +
+      perfMetric('Days absent',    (att.absentDays||0)) +
+      perfMetric('Holidays worked',(att.holidayDays||0)) +
+      perfMetric('Est. gross pay', '₱' + (att.grossPay||0).toLocaleString()) +
+    '</div>' +
+  '</div>';
+
+  // ── Task breakdown section ──
+  html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">' +
+    '<div style="font-size:13px;font-weight:700;color:var(--slate);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">' +
+      '<span>⏱ Task Productivity</span>' +
+      '<span style="font-size:11px;color:var(--muted);font-weight:500;">'+(tasks.totalSessions||0)+' sessions · '+_formatDuration((tasks.totalMin||0)*60000)+' total</span>' +
+    '</div>';
+  if(!tasks.byCategory || !tasks.byCategory.length){
+    html += '<div style="text-align:center;padding:14px;font-size:11px;color:var(--muted);">No task sessions logged in this period.</div>';
+  } else {
+    var maxMin = tasks.byCategory.reduce(function(m,c){ return Math.max(m, c.minutes); }, 0);
+    html += '<div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;">' +
+      '<table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:480px;">' +
+        '<thead><tr style="background:var(--light);color:var(--slate);">' +
+          '<th style="padding:8px 12px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;">Task</th>' +
+          '<th style="padding:8px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;width:70px;">Sessions</th>' +
+          '<th style="padding:8px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;width:90px;">Time</th>' +
+          '<th style="padding:8px 12px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;">Distribution</th>' +
+        '</tr></thead>' +
+        '<tbody>' +
+        tasks.byCategory.map(function(c){
+          var pct = maxMin > 0 ? (c.minutes / maxMin) * 100 : 0;
+          var pctOfTotal = tasks.totalMin > 0 ? Math.round((c.minutes/tasks.totalMin)*1000)/10 : 0;
+          return '<tr style="border-top:1px solid var(--border);">' +
+            '<td style="padding:9px 12px;color:var(--slate);font-weight:500;">'+esc(c.task)+'</td>' +
+            '<td style="padding:9px;text-align:center;color:var(--muted);">'+c.count+'</td>' +
+            '<td style="padding:9px;text-align:center;font-weight:700;color:var(--gold);">'+_formatDuration(c.minutes*60000)+'</td>' +
+            '<td style="padding:9px 12px;">' +
+              '<div style="display:flex;align-items:center;gap:8px;">' +
+                '<div style="flex:1;height:6px;background:rgba(0,0,0,.06);border-radius:3px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,var(--gold),var(--success));"></div></div>' +
+                '<span style="font-size:10px;color:var(--muted);min-width:35px;text-align:right;">'+pctOfTotal+'%</span>' +
+              '</div>' +
+            '</td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody>' +
+      '</table>' +
+    '</div>';
+  }
+  html += '</div>';
+
+  // ── Evaluations section ──
+  html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">' +
+    '<div style="font-size:13px;font-weight:700;color:var(--slate);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">' +
+      '<span>⭐ Evaluations</span>' +
+      '<span style="font-size:11px;color:var(--muted);font-weight:500;">'+(evals.count||0)+' submission'+(evals.count!==1?'s':'')+'</span>' +
+    '</div>';
+  if(!evals.list || !evals.list.length){
+    html += '<div style="text-align:center;padding:14px;font-size:11px;color:var(--muted);">No evaluations in this period.</div>';
+  } else {
+    html += evals.list.map(function(e){
+      var sc = parseFloat(e.score) || 0;
+      var col = sc >= 85 ? {bg:'rgba(58,125,92,.12)',txt:'#3d8c6e'} : sc >= 70 ? {bg:'rgba(218,175,52,.15)',txt:'#a07e1c'} : {bg:'rgba(192,84,74,.12)',txt:'#c0544a'};
+      return '<div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:12px;font-weight:600;color:var(--slate);">'+esc(e.period||e.date||'—')+'</div>' +
+          '<div style="font-size:10px;color:var(--muted);margin-top:2px;">'+esc(e.type||'Evaluation')+(e.reviewer ? ' · by ' + esc(e.reviewer) : '')+'</div>' +
+        '</div>' +
+        '<span style="background:'+col.bg+';color:'+col.txt+';padding:4px 10px;border-radius:10px;font-weight:700;font-size:11px;">'+Math.round(sc)+'%</span>' +
+      '</div>';
+    }).join('');
+  }
+  html += '</div>';
+
+  // ── KPI Tracker section ──
+  html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">' +
+    '<div style="font-size:13px;font-weight:700;color:var(--slate);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">' +
+      '<span>📊 KPI Tracker Weeks</span>' +
+      '<span style="font-size:11px;color:var(--muted);font-weight:500;">'+(kpis.count||0)+' week'+(kpis.count!==1?'s':'')+' · '+(kpis.avgOverall != null ? 'avg ' + Math.round(kpis.avgOverall) + '%' : 'no data')+'</span>' +
+    '</div>';
+  if(!kpis.list || !kpis.list.length){
+    html += '<div style="text-align:center;padding:14px;font-size:11px;color:var(--muted);">No KPI weeks logged in this period.</div>';
+  } else {
+    html += kpis.list.map(function(k){
+      var sc = parseFloat(k.overallScore) || 0;
+      var col = sc >= 95 ? {bg:'rgba(58,125,92,.12)',txt:'#3d8c6e'} : sc >= 75 ? {bg:'rgba(218,175,52,.15)',txt:'#a07e1c'} : {bg:'rgba(192,84,74,.12)',txt:'#c0544a'};
+      return '<div style="padding:10px 12px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:100px 1fr 70px 80px;gap:8px;align-items:center;font-size:11.5px;">' +
+        '<div style="color:var(--slate);font-weight:600;">'+esc(k.weekOf)+'</div>' +
+        '<div style="color:var(--muted);font-size:10px;">'+esc(k.role||'—')+'</div>' +
+        '<div style="text-align:center;"><span style="background:'+col.bg+';color:'+col.txt+';padding:3px 8px;border-radius:10px;font-weight:700;">'+Math.round(sc)+'%</span></div>' +
+        '<div style="text-align:right;color:var(--success);font-weight:700;">₱'+parseFloat(k.bonus||0).toLocaleString()+'</div>' +
+      '</div>';
+    }).join('');
+  }
+  html += '</div>';
+
+  // ── Footer ──
+  html += '<div style="font-size:10px;color:var(--muted);text-align:center;padding:8px;margin-top:8px;">' +
+    'Generated ' + nowPHT().year + '-' + String(nowPHT().month).padStart(2,'0') + '-' + String(nowPHT().day).padStart(2,'0') + ' ' + timeStrPHT(true) + ' · PHT' +
+  '</div>';
+
+  return html;
+}
+
+function perfStatCard(label, value, color){
+  return '<div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">' +
+    '<div style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;">'+label+'</div>' +
+    '<div style="font-size:18px;font-weight:800;color:'+color+';margin-top:4px;">'+value+'</div>' +
+  '</div>';
+}
+function perfMetric(label, value){
+  return '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;">'+label+'</div>' +
+    '<div style="font-weight:700;color:var(--slate);margin-top:2px;">'+value+'</div></div>';
 }
 
 // ════════════════════════════════════════
