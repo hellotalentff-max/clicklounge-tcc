@@ -542,7 +542,7 @@ button:disabled{opacity:.5;cursor:default;}
       <div class="aform">
         <div class="aform-title">📊 Employee KPI Tracker</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5;">
-          Track weekly performance against role-specific KPIs. Scores auto-compute, color-code by tier (green ≥95% · yellow 75-94% · red &lt;75%), and trigger bonus tiers.
+          Track weekly performance against 3 role-specific KPIs. Scores auto-compute and color-code by tier (green ≥95% · yellow 75-94% · red &lt;75%).
         </div>
         <div class="aform-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;">
           <div class="fg"><label class="fl">Employee</label><select class="fi" id="kpi-emp" onchange="kpiLoad()"></select></div>
@@ -564,20 +564,15 @@ button:disabled{opacity:.5;cursor:default;}
 
       <!-- Summary card with overall score + bonus -->
       <div id="kpi-summary-card" style="display:none;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
           <div style="text-align:center;">
             <div style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;">Overall Score</div>
             <div id="kpi-overall-score" style="font-size:36px;font-weight:800;margin-top:4px;">—</div>
             <div id="kpi-overall-label" style="font-size:11px;font-weight:600;margin-top:2px;">—</div>
           </div>
-          <div style="text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);padding:0 14px;">
-            <div style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;">Weekly Bonus</div>
-            <div id="kpi-bonus" style="font-size:32px;font-weight:800;color:var(--success);margin-top:4px;">₱0</div>
-            <div id="kpi-bonus-tier" style="font-size:11px;color:var(--muted);margin-top:2px;">—</div>
-          </div>
-          <div style="text-align:center;">
+          <div style="text-align:center;border-left:1px solid var(--border);padding-left:14px;">
             <div style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;">KPIs Hit</div>
-            <div id="kpi-hit-count" style="font-size:32px;font-weight:800;color:var(--teal);margin-top:4px;">0 / 0</div>
+            <div id="kpi-hit-count" style="font-size:36px;font-weight:800;color:var(--teal);margin-top:4px;">0 / 0</div>
             <div id="kpi-hit-label" style="font-size:11px;color:var(--muted);margin-top:2px;">passing targets</div>
           </div>
         </div>
@@ -3538,39 +3533,31 @@ const KPI_TEMPLATES = {
   'General': [
     { name:'Tasks completed on time', target:95, op:'>=', unit:'%',          weight:1.0, source:'tasks_mgr',     hint:'Auto-pulled from Tasks Manager' },
     { name:'Attendance',              target:100,op:'>=', unit:'%',          weight:1.5, source:'auto_attendance',hint:'Auto-computed from TimeLogs' },
-    { name:'Client satisfaction',     target:4.8,op:'>=', unit:'/5',         weight:1.2, source:'manual',        hint:'Manual: avg client rating' },
-    { name:'Errors requiring rework', target:3,  op:'<',  unit:' errors',    weight:1.0, source:'manual',        hint:'Manual: count of rework instances' },
-    { name:'Initiative',              target:2,  op:'>=', unit:' / month',   weight:0.8, source:'manual',        hint:'Manual: approved projects/improvements' }
+    { name:'Client satisfaction',     target:4.8,op:'>=', unit:'/5',         weight:1.2, source:'manual',        hint:'Manual: avg client rating' }
   ],
   'Photographer': [
-    { name:'Starts session on time',        target:95, op:'>=', unit:'%',          weight:1.0, source:'manual', hint:'Manual: % of sessions started on time' },
-    { name:'Client satisfaction',           target:4.8,op:'>=', unit:'/5',         weight:1.5, source:'manual', hint:'Manual: avg client rating' },
-    { name:'Sessions completed',            target:20, op:'>=', unit:' / week',    weight:1.0, source:'manual', hint:'Manual: count of completed sessions' },
-    { name:'No missing shots',              target:100,op:'>=', unit:'%',          weight:1.3, source:'manual', hint:'Manual: % of sessions with all shots' },
-    { name:'Equipment properly stored',     target:100,op:'>=', unit:'%',          weight:0.8, source:'manual', hint:'Manual: equipment check %' }
+    { name:'Starts session on time',  target:95, op:'>=', unit:'%',          weight:1.0, source:'manual', hint:'Manual: % of sessions started on time' },
+    { name:'Client satisfaction',     target:4.8,op:'>=', unit:'/5',         weight:1.5, source:'manual', hint:'Manual: avg client rating' },
+    { name:'No missing shots',        target:100,op:'>=', unit:'%',          weight:1.3, source:'manual', hint:'Manual: % of sessions with all shots' }
   ],
   'Editor': [
-    { name:'Average turnaround (days)',     target:3,  op:'<=', unit:' days',      weight:1.2, source:'tasks_mgr', hint:'Auto-pulled from Tasks Manager' },
-    { name:'Revisions required (per job)',  target:1,  op:'<=', unit:'',           weight:1.0, source:'manual',    hint:'Manual: avg revisions per delivery' },
-    { name:'Editing quality',               target:4.5,op:'>=', unit:'/5',         weight:1.5, source:'manual',    hint:'Manual: quality rating' },
-    { name:'Files organized correctly',     target:100,op:'>=', unit:'%',          weight:0.8, source:'manual',    hint:'Manual: file organization audit' },
-    { name:'On-time delivery',              target:95, op:'>=', unit:'%',          weight:1.3, source:'tasks_mgr', hint:'Auto-pulled from Tasks Manager' }
+    { name:'Average turnaround (days)', target:3,  op:'<=', unit:' days',    weight:1.2, source:'tasks_mgr', hint:'Auto-pulled from Tasks Manager' },
+    { name:'Editing quality',           target:4.5,op:'>=', unit:'/5',       weight:1.5, source:'manual',    hint:'Manual: quality rating' },
+    { name:'On-time delivery',          target:95, op:'>=', unit:'%',        weight:1.3, source:'tasks_mgr', hint:'Auto-pulled from Tasks Manager' }
   ],
   'Customer Service': [
-    { name:'Response time (minutes)',       target:30, op:'<=', unit:' min',       weight:1.3, source:'manual', hint:'Manual: avg response time' },
-    { name:'Booking conversion rate',       target:60, op:'>=', unit:'%',          weight:1.5, source:'manual', hint:'Manual: leads → bookings %' },
-    { name:'Follow-up completion',          target:95, op:'>=', unit:'%',          weight:1.0, source:'manual', hint:'Manual: follow-ups completed' },
-    { name:'Upselling success',             target:25, op:'>=', unit:'%',          weight:0.8, source:'manual', hint:'Manual: upsell rate' },
-    { name:'Customer feedback',             target:4.7,op:'>=', unit:'/5',         weight:1.4, source:'manual', hint:'Manual: avg customer feedback rating' }
+    { name:'Response time (minutes)',   target:30, op:'<=', unit:' min',     weight:1.3, source:'manual', hint:'Manual: avg response time' },
+    { name:'Booking conversion rate',   target:60, op:'>=', unit:'%',        weight:1.5, source:'manual', hint:'Manual: leads → bookings %' },
+    { name:'Customer feedback',         target:4.7,op:'>=', unit:'/5',       weight:1.4, source:'manual', hint:'Manual: avg customer feedback rating' }
   ]
 };
 
-// Bonus tiers — overall weighted score → peso amount
-const KPI_BONUS_TIERS = [
-  { min:95, amount:2000, label:'🏆 Top Performer'    },
-  { min:85, amount:1000, label:'💎 Solid Performer'  },
-  { min:75, amount: 500, label:'✓ Meeting Expectations' },
-  { min: 0, amount:   0, label:'⚠ Needs Improvement' }
+// Simple score tiers — no peso amounts, just performance labels
+const KPI_TIERS = [
+  { min:95, label:'🏆 Excellent' },
+  { min:85, label:'💎 Strong' },
+  { min:75, label:'✓ On Track' },
+  { min: 0, label:'⚠ Needs Improvement' }
 ];
 
 // Score thresholds — for color coding individual KPIs
@@ -3691,17 +3678,15 @@ function kpiRecalc(){
   });
 
   var overall = totalWeight > 0 ? (weightedScore / totalWeight) : 0;
-  var tier = KPI_BONUS_TIERS.find(function(t){ return overall >= t.min; }) || KPI_BONUS_TIERS[KPI_BONUS_TIERS.length-1];
+  var tier = KPI_TIERS.find(function(t){ return overall >= t.min; }) || KPI_TIERS[KPI_TIERS.length-1];
   var overallColor = kpiColor(overall);
 
   document.getElementById('kpi-summary-card').style.display = '';
   var overEl = document.getElementById('kpi-overall-score');
   overEl.textContent = Math.round(overall) + '%';
   overEl.style.color = overallColor.txt;
-  document.getElementById('kpi-overall-label').textContent = overallColor.label + ' ' + (overall >= 95 ? 'Excellent' : overall >= 75 ? 'On Track' : 'Needs Focus');
+  document.getElementById('kpi-overall-label').textContent = tier.label;
   document.getElementById('kpi-overall-label').style.color = overallColor.txt;
-  document.getElementById('kpi-bonus').textContent = '₱' + tier.amount.toLocaleString();
-  document.getElementById('kpi-bonus-tier').textContent = tier.label;
   document.getElementById('kpi-hit-count').textContent = hits + ' / ' + tmpl.length;
 }
 
@@ -3740,7 +3725,7 @@ async function kpiSave(){
   var totW = entries.reduce(function(a,e){ return a + e.weight; }, 0);
   var wScore = entries.reduce(function(a,e){ return a + (e.score * e.weight); }, 0);
   var overall = totW > 0 ? wScore/totW : 0;
-  var tier = KPI_BONUS_TIERS.find(function(t){ return overall >= t.min; }) || KPI_BONUS_TIERS[KPI_BONUS_TIERS.length-1];
+  var tier = KPI_TIERS.find(function(t){ return overall >= t.min; }) || KPI_TIERS[KPI_TIERS.length-1];
 
   showToast('💾 Saving KPIs for '+emp+'…');
   try{
@@ -3750,12 +3735,12 @@ async function kpiSave(){
       weekOf: week,
       entries: entries,
       overallScore: Math.round(overall * 10) / 10,
-      bonus: tier.amount,
+      bonus: 0,
       bonusLabel: tier.label,
       recordedAt: nowPHT().year + '-' + String(nowPHT().month).padStart(2,'0') + '-' + String(nowPHT().day).padStart(2,'0') + ' ' + timeStrPHT(false)
     });
     if(!r.ok) throw new Error(r.error || 'Save failed');
-    showToast('✅ KPIs saved · Bonus: ₱'+tier.amount.toLocaleString());
+    showToast('✅ KPIs saved · '+tier.label+' ('+Math.round(overall)+'%)');
     kpiLoadHistory(emp);
   }catch(e){ showToast('❌ '+e.message); }
 }
@@ -3802,17 +3787,16 @@ async function kpiLoadHistory(emp){
       return;
     }
     box.innerHTML =
-      '<div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:6px 10px;display:grid;grid-template-columns:110px 1fr 90px 80px 70px;gap:8px;border-bottom:2px solid var(--border);">' +
-        '<div>Week Of</div><div>Role</div><div style="text-align:center;">Score</div><div style="text-align:right;">Bonus</div><div></div>' +
+      '<div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:6px 10px;display:grid;grid-template-columns:110px 1fr 90px 70px;gap:8px;border-bottom:2px solid var(--border);">' +
+        '<div>Week Of</div><div>Role</div><div style="text-align:center;">Score</div><div></div>' +
       '</div>' +
       r.history.map(function(h){
         var sc = parseFloat(h.overallScore) || 0;
         var col = kpiColor(sc);
-        return '<div style="padding:9px 10px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:110px 1fr 90px 80px 70px;gap:8px;align-items:center;font-size:11px;cursor:pointer;" onclick="kpiLoadHistoryWeek(\''+esc(h.weekOf)+'\')" onmouseover="this.style.background=\'var(--light)\'" onmouseout="this.style.background=\'\'">' +
+        return '<div style="padding:9px 10px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:110px 1fr 90px 70px;gap:8px;align-items:center;font-size:11px;cursor:pointer;" onclick="kpiLoadHistoryWeek(\''+esc(h.weekOf)+'\')" onmouseover="this.style.background=\'var(--light)\'" onmouseout="this.style.background=\'\'">' +
           '<div style="color:var(--slate);font-weight:600;">'+esc(h.weekOf)+'</div>' +
           '<div style="color:var(--muted);">'+esc(h.role||'—')+'</div>' +
           '<div style="text-align:center;"><span style="background:'+col.bg+';color:'+col.txt+';padding:3px 8px;border-radius:10px;font-weight:700;">'+Math.round(sc)+'%</span></div>' +
-          '<div style="text-align:right;color:var(--success);font-weight:700;">₱'+parseFloat(h.bonus||0).toLocaleString()+'</div>' +
           '<div style="text-align:right;font-size:9px;color:var(--muted);">load →</div>' +
         '</div>';
       }).join('');
@@ -4097,7 +4081,7 @@ function perfRenderReport(emp, from, to, r){
   html += perfStatCard('⏱ Task Time',        _formatDuration((tasks.totalMin||0) * 60000), 'var(--success)');
   html += perfStatCard('📋 Tasks Logged',    (tasks.totalSessions||0), 'var(--slate)');
   html += perfStatCard('⭐ Avg Eval Score',   (evals.avgScore != null ? Math.round(evals.avgScore) + '%' : '—'), 'var(--gold)');
-  html += perfStatCard('🏆 KPI Bonus Total', '₱' + (kpis.totalBonus||0).toLocaleString(), 'var(--success)');
+  html += perfStatCard('📊 Avg KPI Score', (kpis.avgOverall != null ? Math.round(kpis.avgOverall) + '%' : '—'), 'var(--teal)');
   html += '</div>';
 
   // ── Attendance section ──
@@ -4193,11 +4177,11 @@ function perfRenderReport(emp, from, to, r){
     html += kpis.list.map(function(k){
       var sc = parseFloat(k.overallScore) || 0;
       var col = sc >= 95 ? {bg:'rgba(58,125,92,.12)',txt:'#3d8c6e'} : sc >= 75 ? {bg:'rgba(218,175,52,.15)',txt:'#a07e1c'} : {bg:'rgba(192,84,74,.12)',txt:'#c0544a'};
-      return '<div style="padding:10px 12px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:100px 1fr 70px 80px;gap:8px;align-items:center;font-size:11.5px;">' +
+      return '<div style="padding:10px 12px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:100px 1fr 70px 130px;gap:8px;align-items:center;font-size:11.5px;">' +
         '<div style="color:var(--slate);font-weight:600;">'+esc(k.weekOf)+'</div>' +
         '<div style="color:var(--muted);font-size:10px;">'+esc(k.role||'—')+'</div>' +
         '<div style="text-align:center;"><span style="background:'+col.bg+';color:'+col.txt+';padding:3px 8px;border-radius:10px;font-weight:700;">'+Math.round(sc)+'%</span></div>' +
-        '<div style="text-align:right;color:var(--success);font-weight:700;">₱'+parseFloat(k.bonus||0).toLocaleString()+'</div>' +
+        '<div style="text-align:right;font-size:10px;color:'+col.txt+';font-weight:600;">'+esc(k.bonusLabel||'—')+'</div>' +
       '</div>';
     }).join('');
   }
