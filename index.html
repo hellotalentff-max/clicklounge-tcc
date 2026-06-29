@@ -263,14 +263,52 @@ button:disabled{opacity:.5;cursor:default;}
         <div id="task-timer-display" style="font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gold);font-family:'Inter','SF Mono',monospace;">00:00:00</div>
       </div>
 
-      <!-- Start state: task name input + start button -->
+      <!-- Start state: task picker + start button -->
       <div id="task-start-area">
         <div style="display:flex;gap:6px;align-items:stretch;">
-          <input type="text" id="task-name-input" placeholder="What are you working on? (e.g., Edit June 22 batch)"
+          <select id="task-name-input"
             style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;background:var(--white);color:var(--text);"
-            onkeypress="if(event.key==='Enter') startTaskSession()">
+            onchange="_toggleTaskDetail()">
+            <option value="">— Select task to track —</option>
+            <optgroup label="🎨 Editing & Production">
+              <option value="Photo Editing">Photo Editing</option>
+              <option value="Video Editing">Video Editing</option>
+              <option value="File Organization">File Organization</option>
+              <option value="Backup & Upload">Backup &amp; Upload</option>
+            </optgroup>
+            <optgroup label="📸 Self-Shoot Sessions">
+              <option value="Snapshot Selfie">Snapshot Selfie</option>
+              <option value="Tribe Time">Tribe Time</option>
+              <option value="Crowd Cam">Crowd Cam</option>
+              <option value="Crew Captures">Crew Captures</option>
+              <option value="Frenzy Snaps Birthday">Frenzy Snaps Birthday</option>
+              <option value="Party Clicks Birthday">Party Clicks Birthday</option>
+              <option value="Click Capture Birthday">Click Capture Birthday</option>
+            </optgroup>
+            <optgroup label="📷 Photographer">
+              <option value="Photographer Session">Photographer Session</option>
+              <option value="Studio Rental">Studio Rental</option>
+            </optgroup>
+            <optgroup label="🎉 Events & Rentals">
+              <option value="Event Booking">Event Booking</option>
+              <option value="Booth Rental">Booth Rental</option>
+            </optgroup>
+            <optgroup label="🛠 Studio Operations">
+              <option value="Client Communication">Client Communication</option>
+              <option value="Booking Management">Booking Management</option>
+              <option value="Equipment Maintenance">Equipment Maintenance</option>
+              <option value="Cleaning & Setup">Cleaning &amp; Setup</option>
+              <option value="Inventory Check">Inventory Check</option>
+              <option value="Marketing & Social Media">Marketing &amp; Social Media</option>
+              <option value="Admin Tasks">Admin Tasks</option>
+              <option value="Other">Other (specify below)</option>
+            </optgroup>
+          </select>
           <button class="btn btn-t" onclick="startTaskSession()" style="padding:9px 16px;font-size:12px;white-space:nowrap;">▶ Start</button>
         </div>
+        <input type="text" id="task-name-detail" placeholder="Optional: add detail (e.g., client name, batch #, specific item)"
+          style="display:none;width:100%;margin-top:6px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:12px;background:var(--white);color:var(--text);"
+          onkeypress="if(event.key==='Enter') startTaskSession()">
         <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.4;">Track time spent on individual tasks — separate from clock in/out.</div>
       </div>
 
@@ -3285,22 +3323,46 @@ function showToast(msg){
 var _taskSession = null;     // {name, startTime (epoch ms), startedDisplay}
 var _taskTickInt = null;
 
+// Show/hide the optional detail input when "Other" is selected
+function _toggleTaskDetail(){
+  var sel = document.getElementById('task-name-input');
+  var detail = document.getElementById('task-name-detail');
+  if(sel.value === 'Other'){
+    detail.style.display = '';
+    detail.focus();
+  } else if(sel.value){
+    // Show the detail box even for known tasks (optional context)
+    detail.style.display = '';
+    detail.placeholder = 'Optional: add detail (e.g., client name, batch #)';
+  } else {
+    detail.style.display = 'none';
+    detail.value = '';
+  }
+}
+
 function startTaskSession(){
-  var nameEl = document.getElementById('task-name-input');
-  var name = (nameEl.value || '').trim();
-  if(!name){ showToast('⚠ Enter a task name first'); nameEl.focus(); return; }
+  var sel = document.getElementById('task-name-input');
+  var detailEl = document.getElementById('task-name-detail');
+  var base = (sel.value || '').trim();
+  var detail = (detailEl.value || '').trim();
+
+  if(!base){ showToast('⚠ Pick a task from the dropdown'); return; }
+  if(base === 'Other' && !detail){ showToast('⚠ Add a detail for "Other" tasks'); detailEl.focus(); return; }
   if(!CURR_USER || !CURR_USER.name){ showToast('⚠ Log in first'); return; }
 
+  // Compose final task name: "Photo Editing — June 22 batch" or just "Photo Editing"
+  var taskName = (base === 'Other' ? detail : (detail ? base + ' — ' + detail : base));
+
   _taskSession = {
-    name: name,
+    name: taskName,
     startTime: Date.now(),
-    startedDisplay: timeStrPHT(true) // e.g. "3:42 PM"
+    startedDisplay: timeStrPHT(true)
   };
 
   // Switch UI to running state
   document.getElementById('task-start-area').style.display = 'none';
   document.getElementById('task-running-area').style.display = '';
-  document.getElementById('task-current-name').textContent = name;
+  document.getElementById('task-current-name').textContent = taskName;
   document.getElementById('task-started-at').textContent = 'Started at ' + _taskSession.startedDisplay;
   document.getElementById('task-timer-state').textContent = '⏱ Task running';
   document.getElementById('task-timer-state').style.color = 'var(--gold)';
@@ -3310,8 +3372,10 @@ function startTaskSession(){
   if(_taskTickInt) clearInterval(_taskTickInt);
   _taskTickInt = setInterval(_tickTaskTimer, 1000);
 
-  // Clear input for next task
-  nameEl.value = '';
+  // Reset inputs for next task
+  sel.value = '';
+  detailEl.value = '';
+  detailEl.style.display = 'none';
   showToast('⏱ Task started');
 }
 
