@@ -393,13 +393,11 @@ button:disabled{opacity:.5;cursor:default;}
   <div class="admin-tabs">
     <button class="atab on" onclick="aTab('dash')" id="atab-dash">📊 Dashboard</button>
     <button class="atab" onclick="aTab('logs')" id="atab-logs">🕐 Time Logs</button>
-    <button class="atab" onclick="aTab('ot')" id="atab-ot">⚠ OT <span class="badge-n" id="ot-badge" style="display:none">0</span></button>
-    <button class="atab" onclick="aTab('leave')" id="atab-leave">📅 Leave <span class="badge-n" id="lv-badge" style="display:none">0</span></button>
+    <button class="atab" onclick="aTab('requests')" id="atab-requests">📋 Requests <span class="badge-n" id="req-badge" style="display:none">0</span></button>
     <button class="atab" onclick="aTab('reports')" id="atab-reports">📄 Reports</button>
-    <button class="atab" onclick="aTab('perf')" id="atab-perf">📊 Performance</button>    <button class="atab" onclick="aTab('emp')" id="atab-emp">👥 Employees</button>
+    <button class="atab" onclick="aTab('perf')" id="atab-perf">📊 Performance</button>
+    <button class="atab" onclick="aTab('emp')" id="atab-emp">👥 Employees</button>
     <button class="atab" onclick="aTab('applicants')" id="atab-applicants">📝 Applicants <span class="badge-n" id="app-badge" style="display:none">0</span></button>
-    <button class="atab" onclick="aTab('reviews')" id="atab-reviews">⭐ Reviews <span class="badge-n" id="rev-badge" style="display:none">0</span></button>
-    <button class="atab" onclick="aTab('hol')" id="atab-hol">🏖 Holidays</button>
     <button class="atab" onclick="aTab('set')" id="atab-set">⚙ Settings</button>
   </div>
 
@@ -426,15 +424,35 @@ button:disabled{opacity:.5;cursor:default;}
     </div>
 
     <!-- OT APPROVALS -->
-    <div id="apanel-ot" style="display:none;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:12px;">⚠ Overtime Approval Queue</div>
-      <div id="a-ot-list"></div>
-    </div>
-
-    <!-- LEAVE APPROVALS -->
-    <div id="apanel-leave" style="display:none;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:12px;">📅 Leave Requests</div>
-      <div id="a-leave-list"></div>
+    <!-- ════ REQUESTS — OT + Leave + Holidays combined ════ -->
+    <div id="apanel-requests" style="display:none;">
+      <div style="display:flex;gap:6px;margin-bottom:14px;border-bottom:2px solid var(--border);padding-bottom:8px;">
+        <button class="btn btn-sm" id="req-sub-ot" onclick="reqSub('ot')" style="font-size:11px;">⚠ OT Requests</button>
+        <button class="btn btn-sm" id="req-sub-leave" onclick="reqSub('leave')" style="font-size:11px;">📅 Leave Requests</button>
+        <button class="btn btn-sm" id="req-sub-hol" onclick="reqSub('hol')" style="font-size:11px;">🏖 Holidays</button>
+      </div>
+      <div id="req-panel-ot">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;">⚠ Overtime Approval Queue</div>
+        <div id="a-ot-list"></div>
+      </div>
+      <div id="req-panel-leave" style="display:none;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;">📅 Leave Requests</div>
+        <div id="a-leave-list"></div>
+      </div>
+      <div id="req-panel-hol" style="display:none;">
+        <div class="aform">
+          <div class="aform-title">🏖 Flag a Holiday</div>
+          <div class="aform-grid">
+            <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="h-date"></div>
+            <div class="fg"><label class="fl">Holiday Name</label><input class="fi" id="h-name" placeholder="e.g. Rizal Day"></div>
+            <div class="fg"><label class="fl">Type</label>
+              <select class="fi" id="h-type"><option value="regular">Regular (200%)</option><option value="special">Special Non-Working (130%)</option></select>
+            </div>
+          </div>
+          <button class="btn btn-t" style="margin-top:8px;" onclick="addHoliday()">Flag Holiday</button>
+        </div>
+        <div id="hol-list"></div>
+      </div>
     </div>
 
     <!-- REPORTS -->
@@ -484,6 +502,28 @@ button:disabled{opacity:.5;cursor:default;}
       </div>
 
       <div id="perf-output"></div>
+
+      <!-- Reviews section (inside Performance tab) -->
+      <div class="aform" style="margin-top:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div>
+            <div class="aform-title" style="margin-bottom:2px;">⭐ Staff Evaluations</div>
+            <div style="font-size:11px;color:var(--muted);">Self-evaluations submitted by employees. Review and add feedback here.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+          <select id="rev-filter" class="ainput" onchange="renderReviews()" style="max-width:200px;">
+            <option value="all">All evaluations</option>
+            <option value="submitted" selected>⏳ Pending review</option>
+            <option value="reviewed">✓ Reviewed</option>
+            <option value="draft">📝 Draft only</option>
+          </select>
+          <select id="rev-emp-filter" class="ainput" onchange="renderReviews()" style="max-width:200px;">
+            <option value="">All employees</option>
+          </select>
+        </div>
+        <div id="reviews-list"></div>
+      </div>
     </div>
 
     <!-- EMPLOYEES -->
@@ -516,41 +556,6 @@ button:disabled{opacity:.5;cursor:default;}
     </div>
 
     <!-- REVIEWS -->
-    <div id="apanel-reviews" style="display:none;">
-      <div style="background:rgba(81,137,125,.08);border:1.5px solid rgba(81,137,125,.2);border-radius:12px;padding:14px 16px;margin-bottom:14px;">
-        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">⭐ Performance Evaluations</div>
-        <div style="font-size:11px;color:var(--muted);">Employees fill out self-evaluations from their TimeCommand. Review here and add your feedback.</div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-        <select id="rev-filter" class="ainput" onchange="renderReviews()" style="max-width:200px;">
-          <option value="all">All evaluations</option>
-          <option value="submitted" selected>⏳ Pending review</option>
-          <option value="reviewed">✓ Reviewed</option>
-          <option value="draft">📝 Draft only</option>
-        </select>
-        <select id="rev-emp-filter" class="ainput" onchange="renderReviews()" style="max-width:200px;">
-          <option value="">All employees</option>
-        </select>
-      </div>
-      <div id="reviews-list"></div>
-    </div>
-
-    <!-- HOLIDAYS -->
-    <div id="apanel-hol" style="display:none;">
-      <div class="aform">
-        <div class="aform-title">🏖 Flag a Holiday</div>
-        <div class="aform-grid">
-          <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="h-date"></div>
-          <div class="fg"><label class="fl">Holiday Name</label><input class="fi" id="h-name" placeholder="e.g. Rizal Day"></div>
-          <div class="fg"><label class="fl">Type</label>
-            <select class="fi" id="h-type"><option value="regular">Regular (200%)</option><option value="special">Special Non-Working (130%)</option></select>
-          </div>
-        </div>
-        <button class="btn btn-t" style="margin-top:8px;" onclick="addHoliday()">Flag Holiday</button>
-      </div>
-      <div id="hol-list"></div>
-    </div>
-
     <!-- SETTINGS -->
     <div id="apanel-set" style="display:none;">
       <div class="aform" style="border:2px solid var(--gold);background:rgba(215,144,104,.04);">
@@ -1651,7 +1656,7 @@ function showAdminView(){
 }
 
 function aTab(id){
-  ['dash','logs','ot','leave','reports','perf','emp','applicants','reviews','hol','set'].forEach(function(t){
+  ['dash','logs','requests','reports','perf','emp','applicants','set'].forEach(function(t){
     var btn = document.getElementById('atab-'+t);
     var pnl = document.getElementById('apanel-'+t);
     if(btn) btn.classList.toggle('on',t===id);
@@ -1659,8 +1664,22 @@ function aTab(id){
   });
   if(id === 'logs') renderLogsList();
   if(id === 'applicants') renderApplicants();
-  if(id === 'reviews') loadReviews();
-  if(id === 'perf') perfInit();
+  if(id === 'perf'){ perfInit(); loadReviews(); }
+  if(id === 'requests') reqSub('ot');
+}
+
+// Sub-tabs inside the Requests panel (OT / Leave / Holidays)
+function reqSub(sub){
+  ['ot','leave','hol'].forEach(function(s){
+    var pnl = document.getElementById('req-panel-'+s);
+    var btn = document.getElementById('req-sub-'+s);
+    if(pnl) pnl.style.display = s===sub ? '' : 'none';
+    if(btn){
+      btn.style.background = s===sub ? 'var(--slate)' : '';
+      btn.style.color = s===sub ? '#fff' : '';
+    }
+  });
+  if(sub === 'hol') renderHolidayList();
 }
 
 function renderAdminDash(){
@@ -1674,11 +1693,10 @@ function renderAdminDash(){
 
   // Badge counts
   var pendApp = (d.staff||[]).filter(function(s){ return s.status==='pending'; }).length;
-  var otB = document.getElementById('ot-badge');
-  var lvB = document.getElementById('lv-badge');
+  var reqB = document.getElementById('req-badge');
   var apB = document.getElementById('app-badge');
-  if(otB){ otB.style.display = pendOT?'':'none'; otB.textContent=pendOT; }
-  if(lvB){ lvB.style.display = pendLv?'':'none'; lvB.textContent=pendLv; }
+  var totalReq = pendOT + pendLv;
+  if(reqB){ reqB.style.display = totalReq?'':'none'; reqB.textContent=totalReq; }
   if(apB){ apB.style.display = pendApp?'':'none'; apB.textContent=pendApp; }
 
   document.getElementById('a-kpis').innerHTML=[
