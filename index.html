@@ -3668,11 +3668,12 @@ function perfRenderReport(emp, from, to, r){
 
   // 8. Staff Evaluation Score (from Self-Eval / Admin Review)
   if(evals.count > 0 && evals.avgScore != null){
-    // Eval scores can be 1-5 scale or 0-100. Normalize to %
     var rawEval = evals.avgScore;
     var evalPct = rawEval <= 5 ? (rawEval / 5) * 100 : rawEval;
     var evalDisplay = rawEval <= 5 ? rawEval.toFixed(1) + ' / 5' : Math.round(rawEval) + '%';
     kpis.push({ name:'Staff Evaluation', actual:evalDisplay+' ('+evals.count+' eval'+(evals.count!==1?'s':'')+')', score:evalPct, source:'Self-Eval', target:'5 / 5' });
+  } else {
+    kpis.push({ name:'Staff Evaluation', actual:'No evals yet', score:0, source:'Self-Eval', target:'5 / 5' });
   }
 
   // Overall composite
