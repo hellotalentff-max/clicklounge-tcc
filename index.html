@@ -3627,6 +3627,7 @@ function perfRenderReport(emp, from, to, r){
   var att = r.attendance || {};
   var tasks = r.tasks || {};
   var tm = r.tasksMgr || {};
+  var evals = r.evals || {};
 
   // ── Compute auto-KPIs ──
   var kpis = [];
@@ -3635,7 +3636,7 @@ function perfRenderReport(emp, from, to, r){
   kpis.push({ name:'Attendance Rate', actual: Math.round(attRate)+'%', score:attRate, source:'TimeLogs', target:'100%' });
 
   // 2. Total Hours Worked
-  var hrsTarget = (att.expectedDays||0) * 8; // assume 8h days
+  var hrsTarget = (att.expectedDays||0) * 8;
   var hrsScore = hrsTarget > 0 ? Math.min(100, ((att.totalHours||0)/hrsTarget)*100) : 0;
   kpis.push({ name:'Hours Worked', actual:(att.totalHours||0).toFixed(1)+'h', score:hrsScore, source:'TimeLogs', target:hrsTarget.toFixed(0)+'h' });
 
@@ -3645,15 +3646,15 @@ function perfRenderReport(emp, from, to, r){
   kpis.push({ name:'Punctuality', actual:(att.lateCount||0)+' late', score:lateScore, source:'TimeLogs', target:'0 late' });
 
   // 4. Tasks Timed (task timer sessions)
-  var taskTimedScore = Math.min(100, (tasks.totalSessions||0) / Math.max(att.daysWorked||1,1) * 25); // ~4 tasks/day = 100%
+  var taskTimedScore = Math.min(100, (tasks.totalSessions||0) / Math.max(att.daysWorked||1,1) * 25);
   kpis.push({ name:'Tasks Timed', actual:(tasks.totalSessions||0)+' sessions', score:taskTimedScore, source:'Task Timer', target:'~4/day' });
 
   // 5. Productive Time Tracked
-  var prodTarget = (att.daysWorked||1) * 240; // 4h productive / 8h day
+  var prodTarget = (att.daysWorked||1) * 240;
   var prodScore = prodTarget > 0 ? Math.min(100, (tasks.totalMin||0)/prodTarget*100) : 0;
   kpis.push({ name:'Productive Time', actual:_formatDuration((tasks.totalMin||0)*60000), score:prodScore, source:'Task Timer', target:_formatDuration(prodTarget*60000) });
 
-  // 6. Tasks Completed (from Tasks Manager, if connected)
+  // 6. Tasks Completed (from Tasks Manager)
   if(tm.connected){
     var complScore = tm.total > 0 ? (tm.completed / tm.total) * 100 : 0;
     kpis.push({ name:'Tasks Completed', actual:tm.completed+' / '+tm.total, score:complScore, source:'Tasks Manager', target:'100%' });
@@ -3663,6 +3664,15 @@ function perfRenderReport(emp, from, to, r){
   if(tm.connected && tm.completed > 0){
     var turnScore = tm.avgTurnaround <= 3 ? 100 : tm.avgTurnaround <= 5 ? 75 : 50;
     kpis.push({ name:'Avg Turnaround', actual:tm.avgTurnaround.toFixed(1)+' days', score:turnScore, source:'Tasks Manager', target:'≤3 days' });
+  }
+
+  // 8. Staff Evaluation Score (from Self-Eval / Admin Review)
+  if(evals.count > 0 && evals.avgScore != null){
+    // Eval scores can be 1-5 scale or 0-100. Normalize to %
+    var rawEval = evals.avgScore;
+    var evalPct = rawEval <= 5 ? (rawEval / 5) * 100 : rawEval;
+    var evalDisplay = rawEval <= 5 ? rawEval.toFixed(1) + ' / 5' : Math.round(rawEval) + '%';
+    kpis.push({ name:'Staff Evaluation', actual:evalDisplay+' ('+evals.count+' eval'+(evals.count!==1?'s':'')+')', score:evalPct, source:'Self-Eval', target:'5 / 5' });
   }
 
   // Overall composite
