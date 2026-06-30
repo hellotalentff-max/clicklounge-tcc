@@ -396,11 +396,9 @@ button:disabled{opacity:.5;cursor:default;}
     <button class="atab" onclick="aTab('ot')" id="atab-ot">⚠ OT <span class="badge-n" id="ot-badge" style="display:none">0</span></button>
     <button class="atab" onclick="aTab('leave')" id="atab-leave">📅 Leave <span class="badge-n" id="lv-badge" style="display:none">0</span></button>
     <button class="atab" onclick="aTab('reports')" id="atab-reports">📄 Reports</button>
-    <button class="atab" onclick="aTab('perf')" id="atab-perf">🎯 Performance</button>
-    <button class="atab" onclick="aTab('emp')" id="atab-emp">👥 Employees</button>
+    <button class="atab" onclick="aTab('perf')" id="atab-perf">📊 Performance</button>    <button class="atab" onclick="aTab('emp')" id="atab-emp">👥 Employees</button>
     <button class="atab" onclick="aTab('applicants')" id="atab-applicants">📝 Applicants <span class="badge-n" id="app-badge" style="display:none">0</span></button>
     <button class="atab" onclick="aTab('reviews')" id="atab-reviews">⭐ Reviews <span class="badge-n" id="rev-badge" style="display:none">0</span></button>
-    <button class="atab" onclick="aTab('kpi')" id="atab-kpi">📊 KPI Tracker</button>
     <button class="atab" onclick="aTab('hol')" id="atab-hol">🏖 Holidays</button>
     <button class="atab" onclick="aTab('set')" id="atab-set">⚙ Settings</button>
   </div>
@@ -468,9 +466,9 @@ button:disabled{opacity:.5;cursor:default;}
     <!-- ════ PERFORMANCE REPORT — Merged attendance + tasks + evals ════ -->
     <div id="apanel-perf" style="display:none;">
       <div class="aform">
-        <div class="aform-title">🎯 Performance Report</div>
+        <div class="aform-title">📊 Employee Performance</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5;">
-          Unified view of attendance, task productivity, and evaluation scores. Pulls from TimeLogs, TaskSessions, Evals, and KPIs sheets.
+          Fully auto-computed from TimeLogs, Task Timer sessions, and Tasks Manager. No manual entry — all data pulled from existing systems.
         </div>
         <div class="aform-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;">
           <div class="fg"><label class="fl">Employee</label><select class="fi" id="perf-emp"></select></div>
@@ -535,55 +533,6 @@ button:disabled{opacity:.5;cursor:default;}
         </select>
       </div>
       <div id="reviews-list"></div>
-    </div>
-
-    <!-- ════ KPI TRACKER ════ -->
-    <div id="apanel-kpi" style="display:none;">
-      <div class="aform">
-        <div class="aform-title">📊 Employee KPI Tracker</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5;">
-          Track weekly performance against 3 role-specific KPIs. Scores auto-compute and color-code by tier (green ≥95% · yellow 75-94% · red &lt;75%).
-        </div>
-        <div class="aform-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;">
-          <div class="fg"><label class="fl">Employee</label><select class="fi" id="kpi-emp" onchange="kpiLoad()"></select></div>
-          <div class="fg"><label class="fl">Role</label><select class="fi" id="kpi-role" onchange="kpiRenderForm()">
-            <option value="General">General Staff</option>
-            <option value="Photographer">Photographer</option>
-            <option value="Editor">Editor</option>
-            <option value="Customer Service">Customer Service</option>
-          </select></div>
-          <div class="fg"><label class="fl">Week Of (Monday)</label><input class="fi" type="date" id="kpi-week" onchange="kpiLoad()"></div>
-        </div>
-        <div id="kpi-form-area" style="margin-top:12px;"></div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;">
-          <button class="btn btn-outline" onclick="kpiClear()">Reset</button>
-          <button class="btn btn-outline" onclick="kpiAutoFetch()" id="kpi-autofetch-btn">🔄 Auto-fill from sources</button>
-          <button class="btn btn-t" onclick="kpiSave()">💾 Save Week's KPIs</button>
-        </div>
-      </div>
-
-      <!-- Summary card with overall score + bonus -->
-      <div id="kpi-summary-card" style="display:none;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div style="text-align:center;">
-            <div style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;">Overall Score</div>
-            <div id="kpi-overall-score" style="font-size:36px;font-weight:800;margin-top:4px;">—</div>
-            <div id="kpi-overall-label" style="font-size:11px;font-weight:600;margin-top:2px;">—</div>
-          </div>
-          <div style="text-align:center;border-left:1px solid var(--border);padding-left:14px;">
-            <div style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;">KPIs Hit</div>
-            <div id="kpi-hit-count" style="font-size:36px;font-weight:800;color:var(--teal);margin-top:4px;">0 / 0</div>
-            <div id="kpi-hit-label" style="font-size:11px;color:var(--muted);margin-top:2px;">passing targets</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- History list -->
-      <div class="aform">
-        <div class="aform-title">📅 Weekly History</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Last 12 weeks for selected employee · click any row to reload that week</div>
-        <div id="kpi-history-list" style="font-size:12px;color:var(--muted);">Select an employee to view history.</div>
-      </div>
     </div>
 
     <!-- HOLIDAYS -->
@@ -1702,7 +1651,7 @@ function showAdminView(){
 }
 
 function aTab(id){
-  ['dash','logs','ot','leave','reports','perf','emp','applicants','reviews','kpi','hol','set'].forEach(function(t){
+  ['dash','logs','ot','leave','reports','perf','emp','applicants','reviews','hol','set'].forEach(function(t){
     var btn = document.getElementById('atab-'+t);
     var pnl = document.getElementById('apanel-'+t);
     if(btn) btn.classList.toggle('on',t===id);
@@ -1711,7 +1660,6 @@ function aTab(id){
   if(id === 'logs') renderLogsList();
   if(id === 'applicants') renderApplicants();
   if(id === 'reviews') loadReviews();
-  if(id === 'kpi') kpiInit();
   if(id === 'perf') perfInit();
 }
 
@@ -3527,295 +3475,6 @@ async function loadTaskSessions(){
 //  bonus tier based on weighted overall score.
 // ════════════════════════════════════════════════════════════════
 
-// KPI templates per role — name, target value, comparison operator
-// ('>=' meets-or-exceeds; '<=' below-or-equal), display unit, weight
-const KPI_TEMPLATES = {
-  'General': [
-    { name:'Tasks completed on time', target:95, op:'>=', unit:'%',          weight:1.0, source:'tasks_mgr',     hint:'Auto-pulled from Tasks Manager' },
-    { name:'Attendance',              target:100,op:'>=', unit:'%',          weight:1.5, source:'auto_attendance',hint:'Auto-computed from TimeLogs' },
-    { name:'Client satisfaction',     target:4.8,op:'>=', unit:'/5',         weight:1.2, source:'manual',        hint:'Manual: avg client rating' }
-  ],
-  'Photographer': [
-    { name:'Starts session on time',  target:95, op:'>=', unit:'%',          weight:1.0, source:'manual', hint:'Manual: % of sessions started on time' },
-    { name:'Client satisfaction',     target:4.8,op:'>=', unit:'/5',         weight:1.5, source:'manual', hint:'Manual: avg client rating' },
-    { name:'No missing shots',        target:100,op:'>=', unit:'%',          weight:1.3, source:'manual', hint:'Manual: % of sessions with all shots' }
-  ],
-  'Editor': [
-    { name:'Average turnaround (days)', target:3,  op:'<=', unit:' days',    weight:1.2, source:'tasks_mgr', hint:'Auto-pulled from Tasks Manager' },
-    { name:'Editing quality',           target:4.5,op:'>=', unit:'/5',       weight:1.5, source:'manual',    hint:'Manual: quality rating' },
-    { name:'On-time delivery',          target:95, op:'>=', unit:'%',        weight:1.3, source:'tasks_mgr', hint:'Auto-pulled from Tasks Manager' }
-  ],
-  'Customer Service': [
-    { name:'Response time (minutes)',   target:30, op:'<=', unit:' min',     weight:1.3, source:'manual', hint:'Manual: avg response time' },
-    { name:'Booking conversion rate',   target:60, op:'>=', unit:'%',        weight:1.5, source:'manual', hint:'Manual: leads → bookings %' },
-    { name:'Customer feedback',         target:4.7,op:'>=', unit:'/5',       weight:1.4, source:'manual', hint:'Manual: avg customer feedback rating' }
-  ]
-};
-
-// Simple score tiers — no peso amounts, just performance labels
-const KPI_TIERS = [
-  { min:95, label:'🏆 Excellent' },
-  { min:85, label:'💎 Strong' },
-  { min:75, label:'✓ On Track' },
-  { min: 0, label:'⚠ Needs Improvement' }
-];
-
-// Score thresholds — for color coding individual KPIs
-const KPI_THRESHOLDS = { good: 95, warn: 75 }; // ≥95 green, 75-94 yellow, <75 red
-
-// Score a single KPI: returns 0-100
-function kpiScore(actual, target, op){
-  actual = parseFloat(actual);
-  target = parseFloat(target);
-  if(isNaN(actual)) return 0;
-  if(target === 0) return op === '<=' || op === '<' ? (actual === 0 ? 100 : 0) : 100;
-  if(op === '>=' || op === '>'){
-    return Math.max(0, Math.min(100, (actual / target) * 100));
-  }
-  // '<=' or '<' — lower is better
-  if(actual <= 0) return 100;
-  return Math.max(0, Math.min(100, (target / actual) * 100));
-}
-
-function kpiColor(score){
-  if(score >= KPI_THRESHOLDS.good) return { bg:'rgba(58,125,92,.12)', txt:'#3d8c6e', label:'✅' };
-  if(score >= KPI_THRESHOLDS.warn) return { bg:'rgba(218,175,52,.15)', txt:'#a07e1c', label:'⚠️' };
-  return { bg:'rgba(192,84,74,.12)', txt:'#c0544a', label:'❌' };
-}
-
-// Get Monday of current PHT week
-function kpiCurrentMonday(){
-  var p = nowPHT();
-  var d = new Date(p.year, p.month-1, p.day);
-  var dow = d.getDay(); // 0=Sun..6=Sat
-  var diff = dow === 0 ? -6 : 1 - dow; // shift to Monday
-  d.setDate(d.getDate() + diff);
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-}
-
-function kpiInit(){
-  // Populate employee dropdown from ADMIN_DATA.staff
-  var sel = document.getElementById('kpi-emp');
-  if(!sel) return;
-  var staff = ((ADMIN_DATA && ADMIN_DATA.staff)||[]).filter(function(s){ return s.status !== 'inactive'; });
-  sel.innerHTML = '<option value="">— Select employee —</option>' +
-    staff.map(function(s){ return '<option value="'+esc(s.name)+'">'+esc(s.name)+'</option>'; }).join('');
-  // Default week to current Monday
-  document.getElementById('kpi-week').value = kpiCurrentMonday();
-  kpiRenderForm();
-}
-
-function kpiRenderForm(){
-  var role = document.getElementById('kpi-role').value;
-  var tmpl = KPI_TEMPLATES[role] || KPI_TEMPLATES['General'];
-  var box = document.getElementById('kpi-form-area');
-  if(!tmpl.length){ box.innerHTML = ''; return; }
-  box.innerHTML =
-    '<div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">' +
-    '<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:540px;">' +
-      '<thead><tr style="background:var(--light);color:var(--slate);">' +
-        '<th style="padding:9px 12px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;">KPI</th>' +
-        '<th style="padding:9px 8px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;width:90px;">Target</th>' +
-        '<th style="padding:9px 8px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;width:90px;">Actual</th>' +
-        '<th style="padding:9px 8px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;width:80px;">Score</th>' +
-        '<th style="padding:9px 8px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;width:60px;">Status</th>' +
-      '</tr></thead>' +
-      '<tbody>' +
-      tmpl.map(function(k, i){
-        var targetDisplay = k.target + k.unit + ' (' + (k.op === '<=' || k.op === '<' ? '≤' : '≥') + ')';
-        var srcBadge = '';
-        if(k.source === 'tasks_mgr'){
-          srcBadge = '<span style="display:inline-block;background:rgba(58,125,92,.12);color:#3d8c6e;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-left:6px;">🔄 Tasks Mgr</span>';
-        } else if(k.source === 'auto_attendance'){
-          srcBadge = '<span style="display:inline-block;background:rgba(218,175,52,.15);color:#a07e1c;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-left:6px;">🕒 Auto</span>';
-        } else {
-          srcBadge = '<span style="display:inline-block;background:rgba(0,0,0,.05);color:var(--muted);padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-left:6px;">✏ Manual</span>';
-        }
-        var hintTxt = k.hint ? '<div style="font-size:9px;color:var(--muted);font-weight:400;margin-top:2px;">'+esc(k.hint)+'</div>' : '';
-        return '<tr style="border-top:1px solid var(--border);" data-kpi-row="'+i+'" data-kpi-source="'+(k.source||'manual')+'">' +
-          '<td style="padding:10px 12px;font-weight:600;color:var(--slate);">'+esc(k.name)+srcBadge+'<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:2px;">weight: '+k.weight+'×</div>'+hintTxt+'</td>' +
-          '<td style="padding:10px 8px;text-align:center;color:var(--muted);font-size:11px;">'+targetDisplay+'</td>' +
-          '<td style="padding:10px 8px;text-align:center;"><input type="number" step="0.1" data-kpi-actual="'+i+'" oninput="kpiRecalc()" style="width:70px;padding:6px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;text-align:center;"></td>' +
-          '<td style="padding:10px 8px;text-align:center;font-weight:700;" data-kpi-score="'+i+'">—</td>' +
-          '<td style="padding:10px 8px;text-align:center;font-size:14px;" data-kpi-status="'+i+'">—</td>' +
-        '</tr>';
-      }).join('') +
-      '</tbody>' +
-    '</table>' +
-    '</div>';
-}
-
-function kpiRecalc(){
-  var role = document.getElementById('kpi-role').value;
-  var tmpl = KPI_TEMPLATES[role] || KPI_TEMPLATES['General'];
-  var totalWeight = 0, weightedScore = 0, hits = 0;
-
-  tmpl.forEach(function(k, i){
-    var inp = document.querySelector('[data-kpi-actual="'+i+'"]');
-    var scoreCell = document.querySelector('[data-kpi-score="'+i+'"]');
-    var statCell  = document.querySelector('[data-kpi-status="'+i+'"]');
-    var row = document.querySelector('[data-kpi-row="'+i+'"]');
-    if(!inp || !scoreCell) return;
-
-    var val = inp.value.trim();
-    if(val === ''){
-      scoreCell.textContent = '—';
-      statCell.textContent = '—';
-      row.style.background = '';
-      return;
-    }
-    var actual = parseFloat(val);
-    var score = kpiScore(actual, k.target, k.op);
-    var color = kpiColor(score);
-    scoreCell.innerHTML = '<span style="background:'+color.bg+';color:'+color.txt+';padding:3px 8px;border-radius:10px;font-weight:700;font-size:11px;">'+Math.round(score)+'%</span>';
-    statCell.textContent = color.label;
-    row.style.background = score >= KPI_THRESHOLDS.good ? 'rgba(58,125,92,.04)'
-                         : score >= KPI_THRESHOLDS.warn ? 'rgba(218,175,52,.05)'
-                         : 'rgba(192,84,74,.04)';
-    weightedScore += score * k.weight;
-    totalWeight += k.weight;
-    if(score >= KPI_THRESHOLDS.good) hits++;
-  });
-
-  var overall = totalWeight > 0 ? (weightedScore / totalWeight) : 0;
-  var tier = KPI_TIERS.find(function(t){ return overall >= t.min; }) || KPI_TIERS[KPI_TIERS.length-1];
-  var overallColor = kpiColor(overall);
-
-  document.getElementById('kpi-summary-card').style.display = '';
-  var overEl = document.getElementById('kpi-overall-score');
-  overEl.textContent = Math.round(overall) + '%';
-  overEl.style.color = overallColor.txt;
-  document.getElementById('kpi-overall-label').textContent = tier.label;
-  document.getElementById('kpi-overall-label').style.color = overallColor.txt;
-  document.getElementById('kpi-hit-count').textContent = hits + ' / ' + tmpl.length;
-}
-
-async function kpiSave(){
-  var emp  = document.getElementById('kpi-emp').value;
-  var role = document.getElementById('kpi-role').value;
-  var week = document.getElementById('kpi-week').value;
-  if(!emp){ showToast('⚠ Pick an employee'); return; }
-  if(!week){ showToast('⚠ Pick a week'); return; }
-
-  var role_tmpl = KPI_TEMPLATES[role] || [];
-  var entries = [];
-  var hasAnyData = false;
-  role_tmpl.forEach(function(k, i){
-    var inp = document.querySelector('[data-kpi-actual="'+i+'"]');
-    if(!inp) return;
-    var val = inp.value.trim();
-    if(val !== ''){
-      hasAnyData = true;
-      var actual = parseFloat(val);
-      var score = kpiScore(actual, k.target, k.op);
-      entries.push({
-        kpiName: k.name,
-        target: k.target,
-        op: k.op,
-        unit: k.unit,
-        weight: k.weight,
-        actual: actual,
-        score: Math.round(score * 10) / 10
-      });
-    }
-  });
-  if(!hasAnyData){ showToast('⚠ Enter at least one actual value'); return; }
-
-  // Calculate overall + bonus to store
-  var totW = entries.reduce(function(a,e){ return a + e.weight; }, 0);
-  var wScore = entries.reduce(function(a,e){ return a + (e.score * e.weight); }, 0);
-  var overall = totW > 0 ? wScore/totW : 0;
-  var tier = KPI_TIERS.find(function(t){ return overall >= t.min; }) || KPI_TIERS[KPI_TIERS.length-1];
-
-  showToast('💾 Saving KPIs for '+emp+'…');
-  try{
-    var r = await gas('saveKPIs', {
-      employee: emp,
-      role: role,
-      weekOf: week,
-      entries: entries,
-      overallScore: Math.round(overall * 10) / 10,
-      bonus: 0,
-      bonusLabel: tier.label,
-      recordedAt: nowPHT().year + '-' + String(nowPHT().month).padStart(2,'0') + '-' + String(nowPHT().day).padStart(2,'0') + ' ' + timeStrPHT(false)
-    });
-    if(!r.ok) throw new Error(r.error || 'Save failed');
-    showToast('✅ KPIs saved · '+tier.label+' ('+Math.round(overall)+'%)');
-    kpiLoadHistory(emp);
-  }catch(e){ showToast('❌ '+e.message); }
-}
-
-async function kpiLoad(){
-  var emp  = document.getElementById('kpi-emp').value;
-  var week = document.getElementById('kpi-week').value;
-  if(!emp || !week){ return; }
-  // Clear current form
-  document.querySelectorAll('[data-kpi-actual]').forEach(function(el){ el.value=''; });
-  kpiRecalc();
-  try{
-    var r = await gas('getKPIs', { employee: emp, weekOf: week });
-    if(r.ok && r.kpi && r.kpi.entries && r.kpi.entries.length){
-      // Switch role if different
-      if(r.kpi.role && r.kpi.role !== document.getElementById('kpi-role').value){
-        document.getElementById('kpi-role').value = r.kpi.role;
-        kpiRenderForm();
-      }
-      // Populate form values
-      var tmpl = KPI_TEMPLATES[r.kpi.role] || [];
-      tmpl.forEach(function(k, i){
-        var entry = r.kpi.entries.find(function(e){ return e.kpiName === k.name; });
-        if(entry){
-          var inp = document.querySelector('[data-kpi-actual="'+i+'"]');
-          if(inp) inp.value = entry.actual;
-        }
-      });
-      kpiRecalc();
-    }
-  }catch(e){ /* silent */ }
-  kpiLoadHistory(emp);
-}
-
-async function kpiLoadHistory(emp){
-  var box = document.getElementById('kpi-history-list');
-  if(!emp){ box.textContent = 'Select an employee to view history.'; return; }
-  box.textContent = 'Loading…';
-  try{
-    var r = await gas('getKPIHistory', { employee: emp, limit: 12 });
-    if(!r.ok) throw new Error(r.error || 'Failed');
-    if(!r.history || !r.history.length){
-      box.innerHTML = '<div style="text-align:center;padding:14px;color:var(--muted);font-size:11px;">No history yet for '+esc(emp)+'.</div>';
-      return;
-    }
-    box.innerHTML =
-      '<div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:6px 10px;display:grid;grid-template-columns:110px 1fr 90px 70px;gap:8px;border-bottom:2px solid var(--border);">' +
-        '<div>Week Of</div><div>Role</div><div style="text-align:center;">Score</div><div></div>' +
-      '</div>' +
-      r.history.map(function(h){
-        var sc = parseFloat(h.overallScore) || 0;
-        var col = kpiColor(sc);
-        return '<div style="padding:9px 10px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:110px 1fr 90px 70px;gap:8px;align-items:center;font-size:11px;cursor:pointer;" onclick="kpiLoadHistoryWeek(\''+esc(h.weekOf)+'\')" onmouseover="this.style.background=\'var(--light)\'" onmouseout="this.style.background=\'\'">' +
-          '<div style="color:var(--slate);font-weight:600;">'+esc(h.weekOf)+'</div>' +
-          '<div style="color:var(--muted);">'+esc(h.role||'—')+'</div>' +
-          '<div style="text-align:center;"><span style="background:'+col.bg+';color:'+col.txt+';padding:3px 8px;border-radius:10px;font-weight:700;">'+Math.round(sc)+'%</span></div>' +
-          '<div style="text-align:right;font-size:9px;color:var(--muted);">load →</div>' +
-        '</div>';
-      }).join('');
-  }catch(e){
-    box.innerHTML = '<div style="color:var(--danger);font-size:11px;padding:8px;">'+esc(e.message)+'</div>';
-  }
-}
-
-function kpiLoadHistoryWeek(week){
-  document.getElementById('kpi-week').value = week;
-  kpiLoad();
-}
-
-function kpiClear(){
-  document.querySelectorAll('[data-kpi-actual]').forEach(function(el){ el.value=''; });
-  document.getElementById('kpi-summary-card').style.display = 'none';
-  kpiRecalc();
-}
-
 // ── Tasks Manager URL config ─────────────────────────────────
 var TASKS_MGR_URL = localStorage.getItem('tc_tasks_mgr_url') || '';
 
@@ -3828,36 +3487,25 @@ function saveTasksMgrUrl(){
     resEl.innerHTML = '<span style="color:var(--muted);">Cleared.</span>';
     return;
   }
-  if(!/^https:\/\/script\.google\.com\/macros\/s\/[^\/]+\/exec$/.test(url)){
-    resEl.innerHTML = '<span style="color:var(--danger);">⚠ Doesn\'t look like a GAS /exec URL</span>';
-    return;
-  }
   localStorage.setItem('tc_tasks_mgr_url', url);
   TASKS_MGR_URL = url;
-  resEl.innerHTML = '<span style="color:var(--success);">✓ Saved. Try "Auto-fill from sources" in KPI Tracker.</span>';
+  resEl.innerHTML = '<span style="color:var(--success);">✓ Saved.</span>';
 }
 
 // ── Cross-GAS JSONP fetcher (for Tasks Manager) ─────────────
 function tasksMgrCall(action, payload){
   return new Promise(function(resolve, reject){
-    if(!TASKS_MGR_URL){ reject(new Error('Tasks Manager URL not set in Settings')); return; }
+    if(!TASKS_MGR_URL){ reject(new Error('Tasks Manager URL not set')); return; }
     var cb = 'tmcb_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
     var done = false;
     var to = setTimeout(function(){
-      if(done) return;
-      done = true;
-      delete window[cb];
-      var s = document.getElementById(cb);
-      if(s) s.remove();
-      reject(new Error('Tasks Manager request timed out'));
+      if(done) return; done = true; delete window[cb];
+      var s = document.getElementById(cb); if(s) s.remove();
+      reject(new Error('Tasks Manager timed out'));
     }, 15000);
     window[cb] = function(data){
-      if(done) return;
-      done = true;
-      clearTimeout(to);
-      delete window[cb];
-      var s = document.getElementById(cb);
-      if(s) s.remove();
+      if(done) return; done = true; clearTimeout(to); delete window[cb];
+      var s = document.getElementById(cb); if(s) s.remove();
       resolve(data);
     };
     var data = btoa(unescape(encodeURIComponent(JSON.stringify({ action: action, payload: payload || {} }))));
@@ -3865,122 +3513,18 @@ function tasksMgrCall(action, payload){
     script.id = cb;
     script.src = TASKS_MGR_URL + '?callback=' + cb + '&d=' + encodeURIComponent(data);
     script.onerror = function(){
-      if(done) return;
-      done = true;
-      clearTimeout(to);
-      delete window[cb];
-      script.remove();
-      reject(new Error('Tasks Manager unreachable — check the URL and deployment access'));
+      if(done) return; done = true; clearTimeout(to); delete window[cb]; script.remove();
+      reject(new Error('Tasks Manager unreachable'));
     };
     document.body.appendChild(script);
   });
 }
 
-// ── Auto-fill KPI form from configured sources ──────────────
-async function kpiAutoFetch(){
-  var emp  = document.getElementById('kpi-emp').value;
-  var week = document.getElementById('kpi-week').value;
-  var role = document.getElementById('kpi-role').value;
-  if(!emp){ showToast('⚠ Pick an employee first'); return; }
-  if(!week){ showToast('⚠ Pick a week first'); return; }
-
-  var tmpl = KPI_TEMPLATES[role] || [];
-  var hasTasksMgrKPI = tmpl.some(function(k){ return k.source === 'tasks_mgr'; });
-  var hasAttKPI = tmpl.some(function(k){ return k.source === 'auto_attendance'; });
-
-  var btn = document.getElementById('kpi-autofetch-btn');
-  btn.disabled = true; btn.textContent = '⏳ Fetching…';
-
-  var filledCount = 0;
-  var errors = [];
-
-  // Compute week range (Monday → Sunday)
-  var monday = new Date(week + 'T00:00:00');
-  var sunday = new Date(monday); sunday.setDate(sunday.getDate() + 6);
-  var weekFrom = week;
-  var weekTo = sunday.getFullYear() + '-' + String(sunday.getMonth()+1).padStart(2,'0') + '-' + String(sunday.getDate()).padStart(2,'0');
-
-  // ── 1. Auto-compute Attendance from TimeLogs ──
-  if(hasAttKPI){
-    try{
-      var attR = await gas('getPerformanceReport', { employee: emp, from: weekFrom, to: weekTo });
-      if(attR.ok && attR.attendance){
-        var a = attR.attendance;
-        var attPct = a.expectedDays > 0 ? (a.daysWorked / a.expectedDays) * 100 : 0;
-        tmpl.forEach(function(k, i){
-          if(k.source === 'auto_attendance'){
-            var inp = document.querySelector('[data-kpi-actual="'+i+'"]');
-            if(inp){ inp.value = Math.round(attPct * 10) / 10; filledCount++; }
-          }
-        });
-      }
-    }catch(e){ errors.push('Attendance: ' + e.message); }
-  }
-
-  // ── 2. Auto-pull Tasks Manager data ──
-  if(hasTasksMgrKPI){
-    if(!TASKS_MGR_URL){
-      errors.push('Tasks Manager URL not set — configure in Admin → Settings');
-    } else {
-      try{
-        var taskR = await tasksMgrCall('getTasksForEmployee', { employee: emp, from: weekFrom, to: weekTo });
-        if(taskR && taskR.ok){
-          var tasksList = taskR.tasks || [];
-          // Filter to ones actually assigned to this employee in this window
-          var completed = tasksList.filter(function(t){ return t.completedDate || t.completedAt; });
-          var onTime = completed.filter(function(t){
-            var cd = String(t.completedDate || t.completedAt || '').slice(0,10);
-            var dd = String(t.dueDate || t.due || '').slice(0,10);
-            return cd && dd && cd <= dd;
-          });
-          var assigned = tasksList.length;
-          var onTimePct = assigned > 0 ? (onTime.length / assigned) * 100 : 0;
-
-          // Turnaround = avg days between assigned/created and completed
-          var turnarounds = completed.map(function(t){
-            var s = new Date(String(t.createdAt || t.assignedAt || t.assignedDate || '').slice(0,10));
-            var e = new Date(String(t.completedDate || t.completedAt || '').slice(0,10));
-            if(isNaN(s.getTime()) || isNaN(e.getTime())) return null;
-            return (e - s) / 86400000;
-          }).filter(function(v){ return v !== null && v >= 0; });
-          var avgTurnaround = turnarounds.length > 0
-            ? turnarounds.reduce(function(a,b){ return a+b; }, 0) / turnarounds.length
-            : 0;
-
-          tmpl.forEach(function(k, i){
-            if(k.source !== 'tasks_mgr') return;
-            var inp = document.querySelector('[data-kpi-actual="'+i+'"]');
-            if(!inp) return;
-            if(/on time|on-time|tasks completed/i.test(k.name) || /on.time delivery/i.test(k.name)){
-              inp.value = Math.round(onTimePct * 10) / 10;
-              filledCount++;
-            } else if(/turnaround/i.test(k.name)){
-              inp.value = Math.round(avgTurnaround * 10) / 10;
-              filledCount++;
-            }
-          });
-        } else if(taskR && taskR.error){
-          errors.push('Tasks Manager: ' + taskR.error);
-        }
-      }catch(e){
-        errors.push('Tasks Manager: ' + e.message);
-      }
-    }
-  }
-
-  btn.disabled = false; btn.textContent = '🔄 Auto-fill from sources';
-  kpiRecalc();
-
-  if(filledCount > 0){
-    showToast('✅ Auto-filled ' + filledCount + ' KPI' + (filledCount !== 1 ? 's' : ''));
-  } else if(errors.length){
-    showToast('⚠ ' + errors[0]);
-  } else {
-    showToast('No auto-fillable KPIs for this role. Manual entry only.');
-  }
-  if(errors.length){
-    console.log('[kpiAutoFetch] Some sources failed:', errors);
-  }
+// Helper: color for a score value
+function perfScoreColor(score){
+  if(score >= 95) return { bg:'rgba(58,125,92,.12)', txt:'#3d8c6e', label:'🟢' };
+  if(score >= 75) return { bg:'rgba(218,175,52,.15)', txt:'#a07e1c', label:'🟡' };
+  return { bg:'rgba(192,84,74,.12)', txt:'#c0544a', label:'🔴' };
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -4028,8 +3572,33 @@ async function perfGenerate(){
 
   out.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">📊 Compiling performance data…</div>';
   try{
+    // Fetch from TimeCommand GAS (attendance + tasks sessions + evals)
     var r = await gas('getPerformanceReport', { employee: emp, from: from, to: to });
     if(!r.ok) throw new Error(r.error || 'Failed to load');
+
+    // Also try fetching from Tasks Manager (tasks completed)
+    r.tasksMgr = { connected: false, completed: 0, total: 0, avgTurnaround: 0 };
+    if(TASKS_MGR_URL){
+      try{
+        var tmr = await tasksMgrCall('getTasksForEmployee', { employee: emp, from: from, to: to });
+        if(tmr && tmr.ok){
+          var tasks = tmr.tasks || [];
+          var completed = tasks.filter(function(t){ return t.completedDate || t.completedAt; });
+          var turnarounds = completed.map(function(t){
+            var s = new Date(String(t.createdAt||t.assignedAt||'').slice(0,10));
+            var e2 = new Date(String(t.completedDate||t.completedAt||'').slice(0,10));
+            if(isNaN(s.getTime())||isNaN(e2.getTime())) return null;
+            return (e2-s)/86400000;
+          }).filter(function(v){ return v!==null&&v>=0; });
+          r.tasksMgr = {
+            connected: true,
+            total: tasks.length,
+            completed: completed.length,
+            avgTurnaround: turnarounds.length > 0 ? turnarounds.reduce(function(a,b){return a+b;},0)/turnarounds.length : 0
+          };
+        }
+      }catch(e){ r.tasksMgr.error = e.message; }
+    }
     out.innerHTML = perfRenderReport(emp, from, to, r);
   }catch(e){
     out.innerHTML = '<div style="color:var(--danger);padding:14px;font-size:12px;border:1px solid var(--danger);border-radius:8px;background:rgba(192,84,74,.05);">❌ '+esc(e.message)+'</div>';
@@ -4039,171 +3608,130 @@ async function perfGenerate(){
 function perfRenderReport(emp, from, to, r){
   var att = r.attendance || {};
   var tasks = r.tasks || {};
-  var evals = r.evals || {};
-  var kpis = r.kpis || {};
+  var tm = r.tasksMgr || {};
 
-  // Overall productivity index — composite score across the three dimensions
-  var attScore = 100;
-  if(att.expectedDays > 0){
-    attScore = Math.min(100, (att.daysWorked / att.expectedDays) * 100);
+  // ── Compute auto-KPIs ──
+  var kpis = [];
+  // 1. Attendance Rate
+  var attRate = att.expectedDays > 0 ? Math.min(100, (att.daysWorked / att.expectedDays) * 100) : 0;
+  kpis.push({ name:'Attendance Rate', actual: Math.round(attRate)+'%', score:attRate, source:'TimeLogs', target:'100%' });
+
+  // 2. Total Hours Worked
+  var hrsTarget = (att.expectedDays||0) * 8; // assume 8h days
+  var hrsScore = hrsTarget > 0 ? Math.min(100, ((att.totalHours||0)/hrsTarget)*100) : 0;
+  kpis.push({ name:'Hours Worked', actual:(att.totalHours||0).toFixed(1)+'h', score:hrsScore, source:'TimeLogs', target:hrsTarget.toFixed(0)+'h' });
+
+  // 3. Late Arrivals (lower is better)
+  var maxLate = Math.max(att.daysWorked||1, 1);
+  var lateScore = Math.max(0, 100 - ((att.lateCount||0) / maxLate * 100));
+  kpis.push({ name:'Punctuality', actual:(att.lateCount||0)+' late', score:lateScore, source:'TimeLogs', target:'0 late' });
+
+  // 4. Tasks Timed (task timer sessions)
+  var taskTimedScore = Math.min(100, (tasks.totalSessions||0) / Math.max(att.daysWorked||1,1) * 25); // ~4 tasks/day = 100%
+  kpis.push({ name:'Tasks Timed', actual:(tasks.totalSessions||0)+' sessions', score:taskTimedScore, source:'Task Timer', target:'~4/day' });
+
+  // 5. Productive Time Tracked
+  var prodTarget = (att.daysWorked||1) * 240; // 4h productive / 8h day
+  var prodScore = prodTarget > 0 ? Math.min(100, (tasks.totalMin||0)/prodTarget*100) : 0;
+  kpis.push({ name:'Productive Time', actual:_formatDuration((tasks.totalMin||0)*60000), score:prodScore, source:'Task Timer', target:_formatDuration(prodTarget*60000) });
+
+  // 6. Tasks Completed (from Tasks Manager, if connected)
+  if(tm.connected){
+    var complScore = tm.total > 0 ? (tm.completed / tm.total) * 100 : 0;
+    kpis.push({ name:'Tasks Completed', actual:tm.completed+' / '+tm.total, score:complScore, source:'Tasks Manager', target:'100%' });
   }
-  var taskScore = tasks.totalMin > 0 ? Math.min(100, (tasks.totalMin / (att.daysWorked * 60 * 4)) * 100) : 0; // assume ~4h productive per day
-  var evalScore = evals.avgScore || kpis.avgOverall || 0;
-  var compositeRaw = (attScore * 0.3) + (taskScore * 0.3) + (evalScore * 0.4);
-  var composite = Math.round(compositeRaw * 10) / 10;
-  var compColor = composite >= 85 ? { bg:'rgba(58,125,92,.12)', txt:'#3d8c6e', label:'🟢 Excellent' }
-                : composite >= 70 ? { bg:'rgba(218,175,52,.15)', txt:'#a07e1c', label:'🟡 On Track' }
-                : composite >= 50 ? { bg:'rgba(218,175,52,.15)', txt:'#a07e1c', label:'🟡 Needs Attention' }
-                : { bg:'rgba(192,84,74,.12)', txt:'#c0544a', label:'🔴 Underperforming' };
+
+  // 7. Avg Turnaround (from Tasks Manager)
+  if(tm.connected && tm.completed > 0){
+    var turnScore = tm.avgTurnaround <= 3 ? 100 : tm.avgTurnaround <= 5 ? 75 : 50;
+    kpis.push({ name:'Avg Turnaround', actual:tm.avgTurnaround.toFixed(1)+' days', score:turnScore, source:'Tasks Manager', target:'≤3 days' });
+  }
+
+  // Overall composite
+  var composite = kpis.length > 0 ? kpis.reduce(function(a,k){return a+k.score;},0)/kpis.length : 0;
+  var compColor = perfScoreColor(composite);
+  var compLabel = composite >= 95 ? '🏆 Excellent' : composite >= 85 ? '💎 Strong' : composite >= 75 ? '✓ On Track' : '⚠ Needs Improvement';
 
   var html = '';
 
-  // ── Header card ──
+  // ── Header ──
   html += '<div style="background:linear-gradient(135deg,var(--slate) 0%,#3a3a3a 100%);color:#fff;border-radius:14px;padding:20px;margin-bottom:14px;">' +
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">' +
       '<div>' +
         '<div style="font-size:9px;text-transform:uppercase;letter-spacing:1.2px;opacity:.7;font-weight:700;">Performance Report</div>' +
         '<div style="font-size:22px;font-weight:800;margin-top:4px;">'+esc(emp)+'</div>' +
-        '<div style="font-size:11px;opacity:.7;margin-top:2px;">'+esc(from)+' → '+esc(to)+' · '+(r.daysCovered||0)+' days covered</div>' +
+        '<div style="font-size:11px;opacity:.7;margin-top:2px;">'+esc(from)+' → '+esc(to)+' · '+(r.daysCovered||0)+' days</div>' +
       '</div>' +
-      '<div style="text-align:center;background:'+compColor.bg+';padding:14px 18px;border-radius:12px;min-width:140px;">' +
-        '<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.7);font-weight:700;">Composite Score</div>' +
-        '<div style="font-size:36px;font-weight:800;color:'+compColor.txt+';margin-top:2px;">'+composite+'%</div>' +
-        '<div style="font-size:11px;font-weight:600;color:'+compColor.txt+';">'+compColor.label+'</div>' +
+      '<div style="text-align:center;background:rgba(255,255,255,.1);padding:14px 18px;border-radius:12px;min-width:130px;">' +
+        '<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;opacity:.7;font-weight:700;">Overall</div>' +
+        '<div style="font-size:36px;font-weight:800;color:'+compColor.txt+';margin-top:2px;">'+Math.round(composite)+'%</div>' +
+        '<div style="font-size:11px;font-weight:600;color:'+compColor.txt+';">'+compLabel+'</div>' +
       '</div>' +
     '</div>' +
   '</div>';
 
-  // ── KPI summary strip ──
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px;">';
-  html += perfStatCard('🕒 Days Worked',     (att.daysWorked||0) + (att.expectedDays ? ' / ' + att.expectedDays : ''), 'var(--teal)');
-  html += perfStatCard('⏰ Total Hours',      (att.totalHours||0).toFixed(1) + 'h', 'var(--gold)');
-  html += perfStatCard('⏱ Task Time',        _formatDuration((tasks.totalMin||0) * 60000), 'var(--success)');
-  html += perfStatCard('📋 Tasks Logged',    (tasks.totalSessions||0), 'var(--slate)');
-  html += perfStatCard('⭐ Avg Eval Score',   (evals.avgScore != null ? Math.round(evals.avgScore) + '%' : '—'), 'var(--gold)');
-  html += perfStatCard('📊 Avg KPI Score', (kpis.avgOverall != null ? Math.round(kpis.avgOverall) + '%' : '—'), 'var(--teal)');
-  html += '</div>';
-
-  // ── Attendance section ──
+  // ── Auto-KPI Scorecard ──
   html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">' +
-    '<div style="font-size:13px;font-weight:700;color:var(--slate);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">' +
-      '<span>📋 Attendance & Hours</span>' +
-      '<span style="font-size:11px;font-weight:600;color:'+(attScore>=90?'var(--success)':attScore>=70?'var(--gold)':'var(--danger)')+';">'+Math.round(attScore)+'%</span>' +
-    '</div>' +
-    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;font-size:12px;">' +
-      perfMetric('Regular hours',  (att.regHours||0).toFixed(1) + 'h') +
-      perfMetric('Overtime',       (att.otHours||0).toFixed(1) + 'h') +
-      perfMetric('Break time',     Math.round(att.breakMin||0) + ' min') +
-      perfMetric('Avg shift',      (att.avgShift||0).toFixed(1) + 'h') +
-      perfMetric('Late arrivals',  (att.lateCount||0)) +
-      perfMetric('Days absent',    (att.absentDays||0)) +
-      perfMetric('Holidays worked',(att.holidayDays||0)) +
-      perfMetric('Est. gross pay', '₱' + (att.grossPay||0).toLocaleString()) +
-    '</div>' +
-  '</div>';
+    '<div style="font-size:13px;font-weight:700;color:var(--slate);margin-bottom:12px;">📊 Performance Scorecard</div>' +
+    '<div style="font-size:10px;color:var(--muted);margin-bottom:10px;">All metrics auto-computed — no manual entry needed.</div>' +
+    '<div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;">' +
+    '<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:480px;">' +
+      '<thead><tr style="background:var(--light);color:var(--slate);">' +
+        '<th style="padding:8px 12px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;">KPI</th>' +
+        '<th style="padding:8px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;width:80px;">Target</th>' +
+        '<th style="padding:8px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;width:100px;">Actual</th>' +
+        '<th style="padding:8px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;width:70px;">Score</th>' +
+        '<th style="padding:8px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;width:90px;">Source</th>' +
+      '</tr></thead>' +
+      '<tbody>' +
+    kpis.map(function(k){
+      var col = perfScoreColor(k.score);
+      return '<tr style="border-top:1px solid var(--border);background:'+col.bg.replace(/0\.\d+\)/, '0.03)')+';">' +
+        '<td style="padding:9px 12px;font-weight:600;color:var(--slate);">'+esc(k.name)+'</td>' +
+        '<td style="padding:9px 8px;text-align:center;color:var(--muted);font-size:11px;">'+esc(k.target)+'</td>' +
+        '<td style="padding:9px 8px;text-align:center;font-weight:700;color:var(--slate);">'+esc(k.actual)+'</td>' +
+        '<td style="padding:9px 8px;text-align:center;"><span style="background:'+col.bg+';color:'+col.txt+';padding:3px 8px;border-radius:10px;font-weight:700;font-size:11px;">'+Math.round(k.score)+'%</span></td>' +
+        '<td style="padding:9px 8px;text-align:center;font-size:10px;color:var(--muted);">'+esc(k.source)+'</td>' +
+      '</tr>';
+    }).join('') +
+      '</tbody></table></div></div>';
 
-  // ── Task breakdown section ──
-  html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">' +
-    '<div style="font-size:13px;font-weight:700;color:var(--slate);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">' +
-      '<span>⏱ Task Productivity</span>' +
-      '<span style="font-size:11px;color:var(--muted);font-weight:500;">'+(tasks.totalSessions||0)+' sessions · '+_formatDuration((tasks.totalMin||0)*60000)+' total</span>' +
-    '</div>';
-  if(!tasks.byCategory || !tasks.byCategory.length){
-    html += '<div style="text-align:center;padding:14px;font-size:11px;color:var(--muted);">No task sessions logged in this period.</div>';
-  } else {
+  // ── Task Breakdown (by category from Task Timer) ──
+  if(tasks.byCategory && tasks.byCategory.length){
+    html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">' +
+      '<div style="font-size:13px;font-weight:700;color:var(--slate);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">' +
+        '<span>⏱ Task Time Breakdown</span>' +
+        '<span style="font-size:11px;color:var(--muted);font-weight:500;">'+(tasks.totalSessions||0)+' sessions · '+_formatDuration((tasks.totalMin||0)*60000)+'</span>' +
+      '</div>';
     var maxMin = tasks.byCategory.reduce(function(m,c){ return Math.max(m, c.minutes); }, 0);
-    html += '<div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;">' +
-      '<table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:480px;">' +
-        '<thead><tr style="background:var(--light);color:var(--slate);">' +
-          '<th style="padding:8px 12px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;">Task</th>' +
-          '<th style="padding:8px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;width:70px;">Sessions</th>' +
-          '<th style="padding:8px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;width:90px;">Time</th>' +
-          '<th style="padding:8px 12px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;">Distribution</th>' +
-        '</tr></thead>' +
-        '<tbody>' +
-        tasks.byCategory.map(function(c){
-          var pct = maxMin > 0 ? (c.minutes / maxMin) * 100 : 0;
-          var pctOfTotal = tasks.totalMin > 0 ? Math.round((c.minutes/tasks.totalMin)*1000)/10 : 0;
-          return '<tr style="border-top:1px solid var(--border);">' +
-            '<td style="padding:9px 12px;color:var(--slate);font-weight:500;">'+esc(c.task)+'</td>' +
-            '<td style="padding:9px;text-align:center;color:var(--muted);">'+c.count+'</td>' +
-            '<td style="padding:9px;text-align:center;font-weight:700;color:var(--gold);">'+_formatDuration(c.minutes*60000)+'</td>' +
-            '<td style="padding:9px 12px;">' +
-              '<div style="display:flex;align-items:center;gap:8px;">' +
-                '<div style="flex:1;height:6px;background:rgba(0,0,0,.06);border-radius:3px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,var(--gold),var(--success));"></div></div>' +
-                '<span style="font-size:10px;color:var(--muted);min-width:35px;text-align:right;">'+pctOfTotal+'%</span>' +
-              '</div>' +
-            '</td>' +
-          '</tr>';
-        }).join('') +
-        '</tbody>' +
-      '</table>' +
-    '</div>';
-  }
-  html += '</div>';
-
-  // ── Evaluations section ──
-  html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">' +
-    '<div style="font-size:13px;font-weight:700;color:var(--slate);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">' +
-      '<span>⭐ Evaluations</span>' +
-      '<span style="font-size:11px;color:var(--muted);font-weight:500;">'+(evals.count||0)+' submission'+(evals.count!==1?'s':'')+'</span>' +
-    '</div>';
-  if(!evals.list || !evals.list.length){
-    html += '<div style="text-align:center;padding:14px;font-size:11px;color:var(--muted);">No evaluations in this period.</div>';
-  } else {
-    html += evals.list.map(function(e){
-      var sc = parseFloat(e.score) || 0;
-      var col = sc >= 85 ? {bg:'rgba(58,125,92,.12)',txt:'#3d8c6e'} : sc >= 70 ? {bg:'rgba(218,175,52,.15)',txt:'#a07e1c'} : {bg:'rgba(192,84,74,.12)',txt:'#c0544a'};
-      return '<div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
-        '<div style="flex:1;min-width:0;">' +
-          '<div style="font-size:12px;font-weight:600;color:var(--slate);">'+esc(e.period||e.date||'—')+'</div>' +
-          '<div style="font-size:10px;color:var(--muted);margin-top:2px;">'+esc(e.type||'Evaluation')+(e.reviewer ? ' · by ' + esc(e.reviewer) : '')+'</div>' +
+    html += tasks.byCategory.map(function(c){
+      var pct = maxMin > 0 ? (c.minutes / maxMin) * 100 : 0;
+      var pctOfTotal = tasks.totalMin > 0 ? Math.round((c.minutes/tasks.totalMin)*1000)/10 : 0;
+      return '<div style="padding:8px 0;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 60px 70px;gap:8px;align-items:center;font-size:11.5px;">' +
+        '<div>' +
+          '<div style="font-weight:500;color:var(--slate);">'+esc(c.task)+'</div>' +
+          '<div style="margin-top:3px;height:5px;background:rgba(0,0,0,.06);border-radius:3px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,var(--gold),var(--success));"></div></div>' +
         '</div>' +
-        '<span style="background:'+col.bg+';color:'+col.txt+';padding:4px 10px;border-radius:10px;font-weight:700;font-size:11px;">'+Math.round(sc)+'%</span>' +
+        '<div style="text-align:center;color:var(--muted);font-size:10px;">'+c.count+' runs</div>' +
+        '<div style="text-align:right;font-weight:700;color:var(--gold);">'+_formatDuration(c.minutes*60000)+'</div>' +
       '</div>';
     }).join('');
+    html += '</div>';
   }
-  html += '</div>';
 
-  // ── KPI Tracker section ──
-  html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">' +
-    '<div style="font-size:13px;font-weight:700;color:var(--slate);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">' +
-      '<span>📊 KPI Tracker Weeks</span>' +
-      '<span style="font-size:11px;color:var(--muted);font-weight:500;">'+(kpis.count||0)+' week'+(kpis.count!==1?'s':'')+' · '+(kpis.avgOverall != null ? 'avg ' + Math.round(kpis.avgOverall) + '%' : 'no data')+'</span>' +
+  // ── Tasks Manager summary (if connected) ──
+  if(!tm.connected){
+    html += '<div style="background:var(--white);border:1px dashed var(--border);border-radius:12px;padding:16px;margin-bottom:14px;text-align:center;">' +
+      '<div style="font-size:11px;color:var(--muted);line-height:1.5;">🔗 <strong>Tasks Manager not connected.</strong> Add the Tasks Manager GAS URL in Admin → Settings to include task completion data in this report.</div>' +
     '</div>';
-  if(!kpis.list || !kpis.list.length){
-    html += '<div style="text-align:center;padding:14px;font-size:11px;color:var(--muted);">No KPI weeks logged in this period.</div>';
-  } else {
-    html += kpis.list.map(function(k){
-      var sc = parseFloat(k.overallScore) || 0;
-      var col = sc >= 95 ? {bg:'rgba(58,125,92,.12)',txt:'#3d8c6e'} : sc >= 75 ? {bg:'rgba(218,175,52,.15)',txt:'#a07e1c'} : {bg:'rgba(192,84,74,.12)',txt:'#c0544a'};
-      return '<div style="padding:10px 12px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:100px 1fr 70px 130px;gap:8px;align-items:center;font-size:11.5px;">' +
-        '<div style="color:var(--slate);font-weight:600;">'+esc(k.weekOf)+'</div>' +
-        '<div style="color:var(--muted);font-size:10px;">'+esc(k.role||'—')+'</div>' +
-        '<div style="text-align:center;"><span style="background:'+col.bg+';color:'+col.txt+';padding:3px 8px;border-radius:10px;font-weight:700;">'+Math.round(sc)+'%</span></div>' +
-        '<div style="text-align:right;font-size:10px;color:'+col.txt+';font-weight:600;">'+esc(k.bonusLabel||'—')+'</div>' +
-      '</div>';
-    }).join('');
   }
-  html += '</div>';
 
   // ── Footer ──
   html += '<div style="font-size:10px;color:var(--muted);text-align:center;padding:8px;margin-top:8px;">' +
-    'Generated ' + nowPHT().year + '-' + String(nowPHT().month).padStart(2,'0') + '-' + String(nowPHT().day).padStart(2,'0') + ' ' + timeStrPHT(true) + ' · PHT' +
+    'Generated ' + todayPHT() + ' ' + timeStrPHT(true) + ' PHT · All data auto-computed' +
   '</div>';
 
   return html;
-}
-
-function perfStatCard(label, value, color){
-  return '<div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">' +
-    '<div style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;">'+label+'</div>' +
-    '<div style="font-size:18px;font-weight:800;color:'+color+';margin-top:4px;">'+value+'</div>' +
-  '</div>';
-}
-function perfMetric(label, value){
-  return '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;">'+label+'</div>' +
-    '<div style="font-weight:700;color:var(--slate);margin-top:2px;">'+value+'</div></div>';
 }
 
 // ════════════════════════════════════════
